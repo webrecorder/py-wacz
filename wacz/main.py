@@ -72,11 +72,23 @@ def main(args=None):
     create.add_argument("--date")
     create.add_argument("--title")
     create.add_argument("--desc")
+
+    create.add_argument(
+        "--signing-url",
+        help="URL of signing server to obtain signature for datapackage-digest.json",
+    )
+    create.add_argument("--signing-token", help="Auth token for signing URL")
+
     create.set_defaults(func=create_wacz)
 
     validate = subparsers.add_parser("validate", help="validate a wacz file")
     validate.add_argument("-f", "--file", required=True)
     validate.set_defaults(func=validate_wacz)
+
+    validate.add_argument(
+        "--verify-url",
+        help="URL of verify server to verify the signature, if any, in dapackage-digest.json",
+    )
 
     cmd = parser.parse_args(args=args)
 
@@ -97,7 +109,7 @@ def get_version():
 
 
 def validate_wacz(res):
-    validate = Validation(res.file)
+    validate = Validation(res.file, verify_url=res.verify_url)
     version = validate.version
     validation_tests = []
 
@@ -111,6 +123,7 @@ def validate_wacz(res):
             validate.frictionless_validate,
             validate.check_file_paths,
             validate.check_file_hashes,
+            validate.check_data_package_hash_and_sig,
         ]
     else:
         print("Validation Failed the passed Wacz is invalid")
@@ -202,6 +215,8 @@ def create_wacz(res):
             detect_pages=res.detect_pages,
             passed_pages_dict=passed_pages_dict,
             extract_text=res.text,
+            signing_url=res.signing_url,
+            signing_token=res.signing_token,
             split_seeds=res.split_seeds,
         )
 

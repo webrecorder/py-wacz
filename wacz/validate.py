@@ -1,22 +1,26 @@
 import tempfile, os, zipfile, json, pathlib, pkg_resources, gzip
 from frictionless import validate
-from wacz.util import support_hash_file, now
+from wacz.util import hash_file, hash_content, now
 from wacz.waczindexer import WACZIndexer
 from io import BytesIO, StringIO, TextIOWrapper
 import glob
+import datetime
+import requests
 
 OUTDATED_WACZ = "0.1.0"
 
 
 class Validation(object):
-    def __init__(self, file):
+    def __init__(self, filename, verify_url=None):
         self.dir = tempfile.TemporaryDirectory()
-        self.wacz = file
-        with zipfile.ZipFile(file, "r") as zip_ref:
+        self.wacz = filename
+        with zipfile.ZipFile(filename, "r") as zip_ref:
             zip_ref.extractall(self.dir.name)
             zip_ref.close()
         self.detect_version()
         self.detect_hash_type()
+
+        self.verify_url = verify_url
 
     def check_required_contents(self):
         """Checks the general component of the wacz and notifies users whats missing"""
@@ -170,7 +174,7 @@ class Validation(object):
             zip_ref.close()
 
         with open(os.path.join(dir.name, "indexes/index.cdx.gz"), "rb") as fd:
-            hash = support_hash_file(self.hash_type, fd.read())
+            hash = hash_content(self.hash_type, fd.read())
             gzip_fd = gzip.GzipFile(fileobj=fd)
 
         return cdx == hash
@@ -180,8 +184,7 @@ class Validation(object):
         for filepath in pathlib.Path(self.dir.name).glob("**/*.*"):
             filename = os.path.basename(filepath)
             if filename != "datapackage.json" and filename != "datapackage-digest.json":
-                file = open(filepath, "rb").read()
-                hash = support_hash_file(self.hash_type, file)
+                hash = hash_file(self.hash_type, filepath)
                 file = str(filepath).split("/")[-2:]
                 file = "/".join(file)
                 res = None
@@ -195,3 +198,55 @@ class Validation(object):
                     )
                     return False
         return True
+
+    def check_data_package_hash_and_sig(self):
+        data_digest_filename = os.path.join(self.dir.name, "datapackage-digest.json")
+        if not os.path.exists(data_digest_filename):
+            return True
+
+        with open(data_digest_filename) as fh:
+            data_digest = json.loads(fh.read())
+
+        hash = hash_file(
+            self.hash_type, os.path.join(self.dir.name, "datapackage.json")
+        )
+
+        if hash != data_digest["hash"]:
+            print("datapackage.json hash mismatch to datapackage-digest.json")
+            return False
+
+        try:
+            created = self.parse_date(self.datapackage.get("created"))
+
+            signed = self.parse_date(data_digest.get("date"))
+
+            # no signature date (and probably not signature), end here
+            if not created or not signed:
+                return True
+
+            delta = datetime.timedelta(hours=1)
+
+            if signed - created > delta:
+                print("signed timestamp too much greater than created timestamp")
+                return False
+
+            if data_digest.get("signature") and self.verify_url:
+                res = requests.post(self.verify_url, json=data_digest)
+                if res.status_code == 200:
+                    print("Successfully verified signature via: " + self.verify_url)
+                    return True
+                else:
+                    print("Signature not verified via: " + self.verify_url)
+                    return False
+
+        except Exception as e:
+            print("Validation failed due to error", e)
+            return False
+
+        return True
+
+    def parse_date(self, string):
+        if not string:
+            return None
+
+        return datetime.datetime.strptime(string, "%Y-%m-%dT%H:%M:%SZ")

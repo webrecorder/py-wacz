@@ -6,7 +6,7 @@ from warcio.warcwriter import BufferWARCWriter
 from warcio.timeutils import iso_date_to_timestamp, timestamp_to_iso_date
 from boilerpy3 import extractors
 from wacz.util import (
-    support_hash_file,
+    hash_content,
     now,
     WACZ_VERSION,
     get_py_wacz_version,
@@ -14,6 +14,7 @@ from wacz.util import (
 )
 import datetime
 import hashlib
+import requests
 
 HTML_MIME_TYPES = ("text/html", "application/xhtml", "application/xhtml+xml")
 
@@ -34,6 +35,9 @@ class WACZIndexer(CDXJIndexer):
         self.main_url = kwargs.pop("main_url", "")
         self.main_ts = kwargs.pop("main_ts", "")
         self.hash_type = kwargs.pop("hash_type", "")
+
+        self.signing_url = kwargs.pop("signing_url", "")
+        self.signing_token = kwargs.pop("signing_token", "")
 
         # If the user has specified a hash type use that otherwise default to sha256
         if self.hash_type == None:
@@ -336,7 +340,7 @@ class WACZIndexer(CDXJIndexer):
             package_dict["resources"][i]["path"] = file.filename
             with wacz.open(file, "r") as myfile:
                 content = myfile.read()
-                package_dict["resources"][i]["hash"] = support_hash_file(
+                package_dict["resources"][i]["hash"] = hash_content(
                     self.hash_type, content
                 )
                 package_dict["resources"][i]["bytes"] = len(content)
@@ -375,5 +379,27 @@ class WACZIndexer(CDXJIndexer):
             "hash": "sha256:" + hashlib.sha256(datapackage_bytes).hexdigest(),
         }
 
-        # TODO: add optional signature
+        if self.signing_url:
+            self.do_sign(digest_dict)
+
         return json.dumps(digest_dict, indent=2)
+
+    def do_sign(self, digest_dict):
+        try:
+            headers = {}
+            if self.signing_token:
+                headers["Authorization"] = "bearer " + self.signing_token
+
+            res = requests.post(
+                self.signing_url + "/" + digest_dict["hash"], headers=headers
+            )
+            json = res.json()
+            if json["hash"] != digest_dict["hash"]:
+                return
+
+            digest_dict.update(json)
+            print("Added Signature")
+        except:
+            import traceback
+
+            traceback.print_exc()

@@ -32,7 +32,14 @@ def get_py_wacz_version():
     return pkg_resources.get_distribution("wacz").version
 
 
-def support_hash_file(hash_type, data):
+def hash_file(hash_type, filename):
+    with open(filename, "rb") as fh:
+        data = fh.read()
+
+    return hash_content(hash_type, data)
+
+
+def hash_content(hash_type, data):
     """Hashes the passed content using sha256 or md5"""
     if hash_type == "sha256":
         return "sha256:%s" % hashlib.sha256(data).hexdigest()

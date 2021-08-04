@@ -1,7 +1,7 @@
 import unittest, os, zipfile, sys, gzip, json, tempfile
 from wacz.main import main, now
 from unittest.mock import patch
-from wacz.util import support_hash_file
+from wacz.util import hash_file
 from frictionless import validate, Report
 
 TEST_DIR = os.path.join(os.path.dirname(os.path.realpath(__file__)), "fixtures")
@@ -36,7 +36,7 @@ class TestWaczFormat(unittest.TestCase):
         self.wacz_file = os.path.join(self.tmpdir.name, "valid_example_1.wacz")
         self.warc_file = os.path.join(TEST_DIR, "example-collection.warc")
 
-        self.wacz_archive = os.path.join(
+        self.wacz_archive_warc = os.path.join(
             self.tmpdir.name,
             "unzipped_wacz_1/archive/example-collection.warc",
         )
@@ -78,13 +78,9 @@ class TestWaczFormat(unittest.TestCase):
 
     def test_archive_structure(self):
         """Check that the hash of the original warc file matches that of the warc file in the archive folder"""
-        f = open(self.warc_file, "rb")
-        original_warc = support_hash_file("sha256", f.read())
-        f.close()
+        original_warc = hash_file("sha256", self.warc_file)
 
-        f = open(self.wacz_archive, "rb")
-        archive_warc = support_hash_file("sha256", f.read())
-        f.close()
+        archive_warc = hash_file("sha256", self.wacz_archive_warc)
 
         self.assertEqual(original_warc, archive_warc)
 
@@ -122,9 +118,7 @@ class TestWaczFormat(unittest.TestCase):
         self.assertEqual(len(json_parse["resources"]), 4)
 
         # Check that the correct hash was recorded for a warc
-        f = open(self.warc_file, "rb")
-        original_warc = support_hash_file("sha256", f.read())
-        f.close()
+        original_warc = hash_file("sha256", self.warc_file)
 
         warc_resource = self.find_resource(
             json_parse["resources"], "example-collection.warc"
@@ -132,16 +126,12 @@ class TestWaczFormat(unittest.TestCase):
         self.assertEqual(original_warc, warc_resource["hash"])
 
         # Check that the correct hash was recorded for the index.idx
-        f = open(self.wacz_index_idx, "rb")
-        original_wacz_index_idx = support_hash_file("sha256", f.read())
-        f.close()
+        original_wacz_index_idx = hash_file("sha256", self.wacz_index_idx)
         idx_resource = self.find_resource(json_parse["resources"], "idx")
         self.assertEqual(original_wacz_index_idx, idx_resource["hash"])
 
         # Check that the correct hash was recorded for the index.cdx.gz
-        f = open(self.wacz_index_cdx, "rb")
-        original_wacz_index_cdx = support_hash_file("sha256", f.read())
-        f.close()
+        original_wacz_index_cdx = hash_file("sha256", self.wacz_index_cdx)
         cdx_resource = self.find_resource(json_parse["resources"], "cdx")
         self.assertEqual(original_wacz_index_cdx, cdx_resource["hash"])
 
