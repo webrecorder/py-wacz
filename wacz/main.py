@@ -86,7 +86,13 @@ def main(args=None):
     validate.set_defaults(func=validate_wacz)
 
     validate.add_argument(
-        "--verify-url",
+        "--verify-auth",
+        action="store_true",
+        help="If set, will attempt to validate authenticity of the WACZ, either directly or via remote server if --verifier-url is also set",
+    )
+
+    validate.add_argument(
+        "--verifier-url",
         help="URL of verify server to verify the signature, if any, in dapackage-digest.json",
     )
 
@@ -109,7 +115,9 @@ def get_version():
 
 
 def validate_wacz(res):
-    validate = Validation(res.file, verify_url=res.verify_url)
+    validate = Validation(
+        res.file, verify_auth=res.verify_auth, verifier_url=res.verifier_url
+    )
     version = validate.version
     validation_tests = []
 

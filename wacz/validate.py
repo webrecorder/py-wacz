@@ -5,13 +5,14 @@ from wacz.waczindexer import WACZIndexer
 from io import BytesIO, StringIO, TextIOWrapper
 import glob
 import datetime
+import logging
 import requests
 
 OUTDATED_WACZ = "0.1.0"
 
 
 class Validation(object):
-    def __init__(self, filename, verify_url=None):
+    def __init__(self, filename, verify_auth=False, verifier_url=None):
         self.dir = tempfile.TemporaryDirectory()
         self.wacz = filename
         with zipfile.ZipFile(filename, "r") as zip_ref:
@@ -20,7 +21,8 @@ class Validation(object):
         self.detect_version()
         self.detect_hash_type()
 
-        self.verify_url = verify_url
+        self.verify_auth = verify_auth
+        self.verifier_url = verifier_url
 
     def check_required_contents(self):
         """Checks the general component of the wacz and notifies users whats missing"""
@@ -230,16 +232,40 @@ class Validation(object):
                 print("signed timestamp too much greater than created timestamp")
                 return False
 
-            if data_digest.get("signature") and self.verify_url:
-                res = requests.post(self.verify_url, json=data_digest)
-                if res.status_code == 200:
-                    print("Successfully verified signature via: " + self.verify_url)
+            if data_digest.get("signature"):
+                if not self.verify_auth:
+                    print(
+                        "Note: Has signature, but auth verification skipped, run with --verify-auth to also include verification"
+                    )
+                    return True
+
+                if self.verifier_url:
+                    res = requests.post(self.verifier_url, json=data_digest)
+                    success = res.status_code == 200
+                    msg = self.verifier_url
+                else:
+                    from authsign.verifier import Verifier
+
+                    logging.basicConfig(
+                        format="%(asctime)s: [%(levelname)s]: %(message)s",
+                        level=logging.INFO,
+                    )
+
+                    verifier = Verifier()
+                    success = verifier(data_digest)
+                    msg = "direct check"
+
+                if success:
+                    print("Successfully verified signature via: " + msg)
                     return True
                 else:
-                    print("Signature not verified via: " + self.verify_url)
+                    print("Signature not verified via: " + msg)
                     return False
 
         except Exception as e:
+            import traceback
+
+            traceback.print_exc()
             print("Validation failed due to error", e)
             return False
 
