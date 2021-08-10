@@ -402,10 +402,7 @@ class WACZIndexer(CDXJIndexer):
                 return False
 
             json = res.json()
-            if (
-                json["hash"] != digest_dict["hash"]
-                or json["created"] != self._created
-            ):
+            if json["hash"] != digest_dict["hash"] or json["created"] != self._created:
                 print("Not Signed, signing request failed")
                 return
 
