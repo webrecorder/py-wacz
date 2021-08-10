@@ -39,6 +39,8 @@ class WACZIndexer(CDXJIndexer):
         self.signing_url = kwargs.pop("signing_url", "")
         self.signing_token = kwargs.pop("signing_token", "")
 
+        self._created = None
+
         # If the user has specified a hash type use that otherwise default to sha256
         if self.hash_type == None:
             self.hash_type = "sha256"
@@ -366,6 +368,7 @@ class WACZIndexer(CDXJIndexer):
         package_dict["created"] = datetime.datetime.utcnow().strftime(
             "%Y-%m-%dT%H:%M:%SZ"
         )
+        self._created = package_dict["created"]
 
         package_dict["wacz_version"] = WACZ_VERSION
 
@@ -390,14 +393,24 @@ class WACZIndexer(CDXJIndexer):
             if self.signing_token:
                 headers["Authorization"] = "bearer " + self.signing_token
 
-            res = requests.post(
-                self.signing_url + "/" + digest_dict["hash"], headers=headers
-            )
+            req = {"hash": digest_dict["hash"], "created": self._created}
+
+            res = requests.post(self.signing_url, headers=headers, json=req)
+
+            if res.status_code != 200:
+                raise ValueError("Signing Failed: " + res.text)
+                return False
+
             json = res.json()
-            if json["hash"] != digest_dict["hash"]:
+            if (
+                json["hash"] != digest_dict["hash"]
+                or json["created"] != self._created
+            ):
+                print("Not Signed, signing request failed")
                 return
 
-            digest_dict.update(json)
+            digest_dict["signedData"] = json
+
             print("Added Signature")
         except:
             import traceback

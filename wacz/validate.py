@@ -217,50 +217,43 @@ class Validation(object):
             print("datapackage.json hash mismatch to datapackage-digest.json")
             return False
 
+        signed_data = data_digest.get("signedData")
+        if not signed_data:
+            return True
+
         try:
-            created = self.parse_date(self.datapackage.get("created"))
-
-            signed = self.parse_date(data_digest.get("date"))
-
-            # no signature date (and probably not signature), end here
-            if not created or not signed:
-                return True
-
-            delta = datetime.timedelta(hours=1)
-
-            if signed - created > delta:
-                print("signed timestamp too much greater than created timestamp")
+            if self.datapackage.get("created") != signed_data.get("created"):
+                print("signed timestamp != created timestamp")
                 return False
 
-            if data_digest.get("signature"):
-                if not self.verify_auth:
-                    print(
-                        "Note: Has signature, but auth verification skipped, run with --verify-auth to also include verification"
-                    )
-                    return True
+            if not self.verify_auth:
+                print(
+                    "Note: Has signature, but auth verification skipped, run with --verify-auth to also include verification"
+                )
+                return True
 
-                if self.verifier_url:
-                    res = requests.post(self.verifier_url, json=data_digest)
-                    success = res.status_code == 200
-                    msg = self.verifier_url
-                else:
-                    from authsign.verifier import Verifier
+            if self.verifier_url:
+                res = requests.post(self.verifier_url, json=signed_data)
+                success = res.status_code == 200
+                msg = self.verifier_url
+            else:
+                from authsign.verifier import Verifier
 
-                    logging.basicConfig(
-                        format="%(asctime)s: [%(levelname)s]: %(message)s",
-                        level=logging.INFO,
-                    )
+                logging.basicConfig(
+                    format="%(asctime)s: [%(levelname)s]: %(message)s",
+                    level=logging.INFO,
+                )
 
-                    verifier = Verifier()
-                    success = verifier(data_digest)
-                    msg = "direct check"
+                verifier = Verifier()
+                success = verifier(signed_data)
+                msg = "direct check"
 
-                if success:
-                    print("Successfully verified signature via: " + msg)
-                    return True
-                else:
-                    print("Signature not verified via: " + msg)
-                    return False
+            if success:
+                print("Successfully verified signature via: " + msg)
+                return True
+            else:
+                print("Signature not verified via: " + msg)
+                return False
 
         except Exception as e:
             import traceback
