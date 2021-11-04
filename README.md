@@ -1,11 +1,11 @@
-## wacz
+## py-wacz
 
-**wacz** is a Python extension and command line utility for working with web
+**py-wacz** is a Python extension and command line utility for working with web
 archive data using the [WACZ] format specification. Web Archive Collection
-Zipped (WACZ) allows web archives to be shared and distributed by
-providing a predictable way of packaging up web archive data and metadata as
-a ZIP file. **wacz** supports converting any [WARC] files into WACZ files, and
-optionally generating full-text search indices of pages.
+Zipped (WACZ) allows web archives to be shared and distributed by providing
+a predictable way of packaging up web archive data and metadata as a ZIP file.
+**wacz** supports converting any [WARC] files into WACZ files, and optionally
+generating full-text search indices of pages.
 
 ## Install
 
