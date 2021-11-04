@@ -1,0 +1,13 @@
+coverage:
+  status:
+    project:
+      default:
+        # basic
+        target: 80%
+        threshold: 2%
+        base: auto 
+ 
+  ignore:
+  - "tests/*"
+  - "wacz/__init__.py"
+  - "wacz/__main__.py"
