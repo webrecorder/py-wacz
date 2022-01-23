@@ -127,6 +127,10 @@ This URL should point to an authsign `/sign` api endpoint.
 
 See the section on `--verify-auth` for more info on signing and verification.
 
+### --signing-token
+
+An optional, secret token passed to signing server to allow access. See `authsign` for more details.
+
 
 ## Validate
 
