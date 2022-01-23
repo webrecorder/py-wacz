@@ -2,7 +2,7 @@
 # vim: set sw=4 et:
 from setuptools import setup, find_packages
 
-__version__ = "0.3.2"
+__version__ = "0.4.0"
 
 
 def load_requirements(filename):
@@ -21,6 +21,7 @@ setup(
     description="WACZ Format Tools",
     long_description="Create and validate web archive data packaged using WACZ",
     install_requires=load_requirements("requirements.txt"),
+    extras_require={"signing": ["authsign>=0.3.1", "requests"]},
     zip_safe=True,
     setup_requires=["pytest-runner"],
     entry_points="""

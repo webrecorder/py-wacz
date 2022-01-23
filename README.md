@@ -119,6 +119,19 @@ Allows the user to specify the hash type used:  (sha256 or md5):
 wacz create tests/fixtures/example-collection.warc --hash-type md5
 ```
 
+### --signing-url
+
+An optional URL for [WACZ signing server](https://github.com/webrecorder/authsign) which will be used to add a signature to the new WACZ.
+
+This URL should point to an authsign `/sign` api endpoint.
+
+See the section on `--verify-auth` for more info on signing and verification.
+
+### --signing-token
+
+An optional, secret token passed to signing server to allow access. See `authsign` for more details.
+
+
 ## Validate
 
 You can also validate an existing WACZ file by running:
@@ -134,6 +147,22 @@ Explicitly declare the file being passed to the validate function.
 ```
 wacz validate -f tests/fixtures/example-collection.warc
 ```
+
+### --verify-auth
+
+New option in 0.4.0, this option also verifies the WACZ is signed, using [authsign](https://github.com/webrecorder/authsign)
+
+The verification can be done locally, or via remote signing/verification server.
+
+To use remote server, add `--verify-url` which should be a URL pointing to the authsign `/verify` endpoint.
+
+To run locally, the `authsign` must be installed, which can be done by running `pip install wacz[signing]`.
+
+See [WACZ Authentication Spec](https://github.com/webrecorder/wacz-auth-spec) on WACZ authentication.
+
+This feature and the specification are still in development (alpha-quality) and is subject to change.
+
+
 
 ## Testing
 
