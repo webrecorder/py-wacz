@@ -37,7 +37,14 @@ class TestWaczFormat(unittest.TestCase):
 
     def test_overall_command(self):
         self.assertEqual(
-            main(["validate", "-f", os.path.join(self.tmpdir.name, "valid_example_1.wacz")]), 0
+            main(
+                [
+                    "validate",
+                    "-f",
+                    os.path.join(self.tmpdir.name, "valid_example_1.wacz"),
+                ]
+            ),
+            0,
         )
 
     def test_check_indexes_valid(self):

@@ -240,7 +240,9 @@ class Validation(object):
                 try:
                     from authsign.verifier import Verifier
                 except ImportError:
-                    print("authsign package not found, can not verify signature. Try installing with 'pip install wacz[signing]'")
+                    print(
+                        "authsign package not found, can not verify signature. Try installing with 'pip install wacz[signing]'"
+                    )
                     return False
 
                 logging.basicConfig(
