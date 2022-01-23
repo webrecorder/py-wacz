@@ -237,7 +237,11 @@ class Validation(object):
                 success = res.status_code == 200
                 msg = self.verifier_url
             else:
-                from authsign.verifier import Verifier
+                try:
+                    from authsign.verifier import Verifier
+                except ImportError:
+                    print("authsign package not found, can not verify signature. Try installing with 'pip install wacz[signing]'")
+                    return False
 
                 logging.basicConfig(
                     format="%(asctime)s: [%(levelname)s]: %(message)s",
