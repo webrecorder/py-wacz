@@ -21,7 +21,7 @@ setup(
     description="WACZ Format Tools",
     long_description="Create and validate web archive data packaged using WACZ",
     install_requires=load_requirements("requirements.txt"),
-    extras_require={"signing": ["authsign>=0.3.1"]},
+    extras_require={"signing": ["authsign>=0.3.1", "requests"]},
     zip_safe=True,
     setup_requires=["pytest-runner"],
     entry_points="""

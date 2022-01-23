@@ -1,6 +1,6 @@
 import json, shortuuid
 from urllib.parse import quote, urlsplit, urlunsplit
-import os, gzip, glob, zipfile
+import os, gzip, glob, zipfile, traceback
 from cdxj_indexer.main import CDXJIndexer
 from warcio.warcwriter import BufferWARCWriter
 from warcio.timeutils import iso_date_to_timestamp, timestamp_to_iso_date
@@ -410,6 +410,4 @@ class WACZIndexer(CDXJIndexer):
 
             print("Added Signature")
         except:
-            import traceback
-
             traceback.print_exc()
