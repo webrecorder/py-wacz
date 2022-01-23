@@ -31,3 +31,16 @@ class TestVerifySigned(unittest.TestCase):
             ),
             1,
         )
+
+    def test_wacz_valid_not_signed(self):
+        self.assertEqual(
+            main(
+                [
+                    "validate",
+                    "--verify-auth",
+                    "-f",
+                    os.path.join(TEST_DIR, "valid_example_1.wacz"),
+                ]
+            ),
+            1,
+        )
