@@ -123,6 +123,8 @@ wacz create tests/fixtures/example-collection.warc --hash-type md5
 
 An optional URL for [WACZ signing server](https://github.com/webrecorder/authsign) which will be used to add a signature to the new WACZ.
 
+This URL should point to an authsign `/sign` api endpoint.
+
 See the section on `--verify-auth` for more info on signing and verification.
 
 
@@ -148,7 +150,7 @@ New option in 0.4.0, this option also verifies the WACZ is signed, using [authsi
 
 The verification can be done locally, or via remote signing/verification server.
 
-To use remote server, add `--verify-url` to point to the authsign `/verify` endpoint.
+To use remote server, add `--verify-url` which should be a URL pointing to the authsign `/verify` endpoint.
 
 To run locally, the `authsign` must be installed, which can be done by running `pip install wacz[signing]`.
 
