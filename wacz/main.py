@@ -224,11 +224,12 @@ def create_wacz(res):
         if total_size > ZIP64_REQ_SIZE:
             force_zip64 = True
 
+        print("Total Size: {0}, zip64: {1}".format(total_size, force_zip64))
+
         index_fh.seek(0)
 
         with wacz.open(data_file, "w", force_zip64=force_zip64) as data:
             shutil.copyfileobj(index_fh, data)
-
 
     # write index idx
     index_buff.seek(0)
