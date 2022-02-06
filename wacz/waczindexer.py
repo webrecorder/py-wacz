@@ -40,6 +40,7 @@ class WACZIndexer(CDXJIndexer):
         self.signing_token = kwargs.pop("signing_token", "")
 
         self._created = None
+        self.total_size = 0
 
         # If the user has specified a hash type use that otherwise default to sha256
         if self.hash_type == None:
@@ -67,6 +68,10 @@ class WACZIndexer(CDXJIndexer):
                 "Warning. You've passed the --text flag without the --detect-pages flag. No pages.jsonl file will be generated. You must enable the --detect-pages and --text flags together in order to get a pages.jsonl file with full text."
             )
         self.referrers = set()
+
+    def process_one(self, input_, output, filename):
+        self.total_size += os.stat(filename).st_size
+        super().process_one(input_, output, filename)
 
     def process_index_entry(self, it, record, *args):
         type_ = record.rec_type
@@ -207,7 +212,6 @@ class WACZIndexer(CDXJIndexer):
 
             if self.split_seeds and not input_page.get("seed"):
                 self.extra_pages[matched_id] = new_page
-                print("EXTRA", url)
             else:
                 self.pages[matched_id] = new_page
 

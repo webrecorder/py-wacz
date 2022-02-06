@@ -1,6 +1,7 @@
 from argparse import ArgumentParser, RawTextHelpFormatter
 from io import BytesIO, StringIO, TextIOWrapper
 import os, json, datetime, shutil, zipfile, sys, gzip, pkg_resources
+import tempfile
 from wacz.waczindexer import WACZIndexer
 from wacz.util import now, WACZ_VERSION, construct_passed_pages_dict
 from wacz.validate import Validation, OUTDATED_WACZ
@@ -18,6 +19,10 @@ PAGE_INDEX_TEMPLATE = "pages/{0}.jsonl"
 
 # setting to size matching archiveweb.page defaults
 DEFAULT_NUM_LINES = 1024
+
+
+# force ZIP64 if archives + indexes size is above this size
+ZIP64_REQ_SIZE = 3500000000
 
 
 def main(args=None):
@@ -164,6 +169,8 @@ def create_wacz(res):
 
     passed_pages_dict = {}
 
+    force_zip64 = False
+
     # If the flag for passed pages has been passed
     if res.pages != None:
         print("Validating passed pages.jsonl file")
@@ -187,32 +194,14 @@ def create_wacz(res):
         # Create a dict of the passed pages that will be used in the construction of the index
         passed_pages_dict = construct_passed_pages_dict(passed_content)
 
-    if res.extra_pages:
-        print("Validating extra pages file")
-        with open(res.extra_pages) as fh:
-            data = fh.read()
-            for page_str in data.strip().split("\n"):
-                page_json = validateJSON(page_str)
-
-                if not page_json:
-                    print(
-                        "The extra pages jsonl file cannot be validated. Error found on the following line\n %s"
-                        % page_str
-                    )
-                    return 1
-
-        extra_pages_file = zipfile.ZipInfo(EXTRA_PAGES_INDEX, now())
-        with wacz.open(extra_pages_file, "w") as efh:
-            efh.write(data.encode("utf-8"))
-
     print("Reading and Indexing All WARCs")
-    with wacz.open(data_file, "w") as data:
+    with tempfile.TemporaryFile() as index_fh:
         wacz_indexer = WACZIndexer(
             text_wrap,
             res.inputs,
             sort=True,
             post_append=True,
-            compress=data,
+            compress=index_fh,
             lines=DEFAULT_NUM_LINES,
             digest_records=True,
             fields="referrer",
@@ -230,10 +219,40 @@ def create_wacz(res):
 
         wacz_indexer.process_all()
 
+        total_size = wacz_indexer.total_size + index_buff.tell() + index_fh.tell()
+
+        if total_size > ZIP64_REQ_SIZE:
+            force_zip64 = True
+
+        index_fh.seek(0)
+
+        with wacz.open(data_file, "w", force_zip64=force_zip64) as data:
+            shutil.copyfileobj(index_fh, data)
+
+
+    # write index idx
     index_buff.seek(0)
 
-    with wacz.open(index_file, "w") as index:
+    with wacz.open(index_file, "w", force_zip64=force_zip64) as index:
         shutil.copyfileobj(index_buff, index)
+
+    if res.extra_pages:
+        print("Validating extra pages file")
+        with open(res.extra_pages) as fh:
+            data = fh.read()
+            for page_str in data.strip().split("\n"):
+                page_json = validateJSON(page_str)
+
+                if not page_json:
+                    print(
+                        "The extra pages jsonl file cannot be validated. Error found on the following line\n %s"
+                        % page_str
+                    )
+                    return 1
+
+        extra_pages_file = zipfile.ZipInfo(EXTRA_PAGES_INDEX, now())
+        with wacz.open(extra_pages_file, "w", force_zip64=force_zip64) as efh:
+            efh.write(data.encode("utf-8"))
 
     # write archives
     print("Writing archives...")
@@ -241,7 +260,7 @@ def create_wacz(res):
         archive_file = zipfile.ZipInfo.from_file(
             _input, "archive/" + os.path.basename(_input)
         )
-        with wacz.open(archive_file, "w") as out_fh:
+        with wacz.open(archive_file, "w", force_zip64=force_zip64) as out_fh:
             with open(_input, "rb") as in_fh:
                 shutil.copyfileobj(in_fh, out_fh)
                 path = "archive/" + os.path.basename(_input)
