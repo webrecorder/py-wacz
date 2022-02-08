@@ -1,6 +1,6 @@
 import tempfile, os, zipfile, json, pathlib, pkg_resources, gzip
 from frictionless import validate
-from wacz.util import hash_file, hash_content, now
+from wacz.util import hash_stream, now
 from wacz.waczindexer import WACZIndexer
 from io import BytesIO, StringIO, TextIOWrapper
 import glob
@@ -176,27 +176,29 @@ class Validation(object):
             zip_ref.close()
 
         with open(os.path.join(dir.name, "indexes/index.cdx.gz"), "rb") as fd:
-            hash = hash_content(self.hash_type, fd.read())
+            size, hash_ = hash_stream(self.hash_type, fd)
             gzip_fd = gzip.GzipFile(fileobj=fd)
 
-        return cdx == hash
+        return cdx == hash_
 
     def check_file_hashes(self):
         """Uses the datapackage to check that all the hashes of file in the data folder match those in the datapackage"""
         for filepath in pathlib.Path(self.dir.name).glob("**/*.*"):
             filename = os.path.basename(filepath)
             if filename != "datapackage.json" and filename != "datapackage-digest.json":
-                hash = hash_file(self.hash_type, filepath)
-                file = str(filepath).split("/")[-2:]
-                file = "/".join(file)
+                with open(filepath, "rb") as fh:
+                    size, hash_ = hash_stream(self.hash_type, fh)
+
+                path = str(filepath).split("/")[-2:]
+                path = "/".join(path)
                 res = None
                 for item in self.datapackage["resources"]:
-                    if item["path"] == file:
+                    if item["path"] == path:
                         res = item
-                if res == None or (res["hash"] != hash):
+                if res == None or (res["hash"] != hash_):
                     print(
                         "\nfile %s's hash does not match the hash listed in the datapackage"
-                        % file
+                        % path
                     )
                     return False
         return True
@@ -209,11 +211,10 @@ class Validation(object):
         with open(data_digest_filename) as fh:
             data_digest = json.loads(fh.read())
 
-        hash = hash_file(
-            self.hash_type, os.path.join(self.dir.name, "datapackage.json")
-        )
+        with open(os.path.join(self.dir.name, "datapackage.json"), "rb") as fh:
+            size, hash_ = hash_stream(self.hash_type, fh)
 
-        if hash != data_digest["hash"]:
+        if hash_ != data_digest["hash"]:
             print("datapackage.json hash mismatch to datapackage-digest.json")
             return False
 
