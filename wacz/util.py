@@ -5,7 +5,7 @@ import pkg_resources
 WACZ_VERSION = "1.1.1"
 
 
-BUFF_SIZE = 1024*64
+BUFF_SIZE = 1024 * 64
 
 
 def check_http_and_https(url, ts, pages_dict):
