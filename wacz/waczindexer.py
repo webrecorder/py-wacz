@@ -208,7 +208,6 @@ class WACZIndexer(CDXJIndexer):
 
             if self.split_seeds and not input_page.get("seed"):
                 self.extra_pages[matched_id] = new_page
-                print("EXTRA", url)
             else:
                 self.pages[matched_id] = new_page
 
