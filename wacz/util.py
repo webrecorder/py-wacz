@@ -32,19 +32,23 @@ def get_py_wacz_version():
     return pkg_resources.get_distribution("wacz").version
 
 
-def hash_file(hash_type, filename):
-    with open(filename, "rb") as fh:
-        data = fh.read()
+def hash_stream(hash_type, stream):
+    """Hashes the stream with given hash_type hasher"""
+    try:
+        hasher = hashlib.new(hash_type)
+    except:
+        return 0, ""
 
-    return hash_content(hash_type, data)
+    size = 0
 
+    while True:
+        buff = stream.read()
+        size += len(buff)
+        hasher.update(buff)
+        if not buff:
+            break
 
-def hash_content(hash_type, data):
-    """Hashes the passed content using sha256 or md5"""
-    if hash_type == "sha256":
-        return "sha256:%s" % hashlib.sha256(data).hexdigest()
-    if hash_type == "md5":
-        return "md5:%s" % hashlib.md5(data).hexdigest()
+    return size, hash_type + ":" + hasher.hexdigest()
 
 
 def construct_passed_pages_dict(passed_content):

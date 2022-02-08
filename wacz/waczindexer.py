@@ -6,12 +6,13 @@ from warcio.warcwriter import BufferWARCWriter
 from warcio.timeutils import iso_date_to_timestamp, timestamp_to_iso_date
 from boilerpy3 import extractors
 from wacz.util import (
-    hash_content,
+    hash_stream,
     now,
     WACZ_VERSION,
     get_py_wacz_version,
     check_http_and_https,
 )
+
 import datetime
 import hashlib
 import requests
@@ -336,20 +337,22 @@ class WACZIndexer(CDXJIndexer):
         package_dict = {}
 
         package_dict["profile"] = "data-package"
-        package_dict["resources"] = []
-        for i in range(0, len(wacz.infolist())):
-            file = wacz.infolist()[i]
-            package_dict["resources"].append({})
-            package_dict["resources"][i]["name"] = os.path.basename(
-                file.filename
-            ).lower()
-            package_dict["resources"][i]["path"] = file.filename
-            with wacz.open(file, "r") as myfile:
-                content = myfile.read()
-                package_dict["resources"][i]["hash"] = hash_content(
-                    self.hash_type, content
-                )
-                package_dict["resources"][i]["bytes"] = len(content)
+
+        resources = []
+
+        for zip_entry in wacz.infolist():
+            res_entry = {}
+            res_entry["name"] = os.path.basename(zip_entry.filename).lower()
+            res_entry["path"] = zip_entry.filename
+
+            with wacz.open(zip_entry, "r") as stream:
+                size, hash_ = hash_stream(self.hash_type, stream)
+                res_entry["hash"] = hash_
+                res_entry["bytes"] = size
+
+            resources.append(res_entry)
+
+        package_dict["resources"] = resources
 
         # set optional metadata
         desc = res.desc or self.desc
