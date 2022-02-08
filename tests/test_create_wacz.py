@@ -1,10 +1,17 @@
 import unittest, os, zipfile, sys, gzip, json, tempfile
 from wacz.main import main, now
 from unittest.mock import patch
-from wacz.util import hash_file
+from wacz.util import hash_stream
 from frictionless import validate, Report
 
 TEST_DIR = os.path.join(os.path.dirname(os.path.realpath(__file__)), "fixtures")
+
+
+def hash_file(type_, filename):
+    with open(filename, "rb") as fh:
+        size_, hash_ = hash_stream(type_, fh)
+
+    return hash_
 
 
 class TestWaczFormat(unittest.TestCase):
