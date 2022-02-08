@@ -5,6 +5,9 @@ import pkg_resources
 WACZ_VERSION = "1.1.1"
 
 
+BUFF_SIZE = 1024*64
+
+
 def check_http_and_https(url, ts, pages_dict):
     """Checks for http and https versions of the passed url
     in the pages dict
@@ -42,7 +45,7 @@ def hash_stream(hash_type, stream):
     size = 0
 
     while True:
-        buff = stream.read()
+        buff = stream.read(BUFF_SIZE)
         size += len(buff)
         hasher.update(buff)
         if not buff:
