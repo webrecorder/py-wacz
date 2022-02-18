@@ -15,7 +15,7 @@ def check_http_and_https(url, ts, pages_dict):
     :returns: True or False depending on if a match was found
     :rtype: boolean
     """
-    url_body = url.split(":")[1]
+    url_body = url.split(":", 1)[1]
     checks = [
         f"http:{url_body}",
         f"https:{url_body}",
