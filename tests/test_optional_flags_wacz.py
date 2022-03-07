@@ -32,7 +32,7 @@ class TestWaczFormat(unittest.TestCase):
                         os.path.join(tmpdir, fp.name),
                     ]
                 ),
-                1,
+                0,
             )
 
     @patch("wacz.main.now")

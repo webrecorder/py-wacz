@@ -173,22 +173,12 @@ def create_wacz(res):
         if passed_content[len(passed_content) - 1] == "":
             passed_content.pop()
 
-        # Confirm the passed jsonl file has valid json on each line
-        for page_str in passed_content:
-            page_json = validateJSON(page_str)
-
-            if not page_json:
-                print(
-                    "The passed jsonl file cannot be validated. Error found on the following line\n %s"
-                    % page_str
-                )
-                return 1
-
         # Create a dict of the passed pages that will be used in the construction of the index
         passed_pages_dict = construct_passed_pages_dict(passed_content)
 
     if res.extra_pages:
         print("Validating extra pages file")
+        extra_page_data = []
         with open(res.extra_pages) as fh:
             data = fh.read()
             for page_str in data.strip().split("\n"):
@@ -196,14 +186,16 @@ def create_wacz(res):
 
                 if not page_json:
                     print(
-                        "The extra pages jsonl file cannot be validated. Error found on the following line\n %s"
+                        "Warning: Ignoring invalid extra page\n %s"
                         % page_str
                     )
-                    return 1
+                    continue
+
+                extra_page_data.append(page_str.encode("utf-8"))
 
         extra_pages_file = zipfile.ZipInfo(EXTRA_PAGES_INDEX, now())
         with wacz.open(extra_pages_file, "w") as efh:
-            efh.write(data.encode("utf-8"))
+            efh.write(b"\n".join(extra_page_data))
 
     print("Reading and Indexing All WARCs")
     with wacz.open(data_file, "w") as data:
@@ -273,7 +265,12 @@ def create_wacz(res):
         title_value = "Pages"
 
         # If the user has provided a title or an id in a header of their file we will use those instead of our default.
-        header = json.loads(passed_content[0])
+        try:
+            header = json.loads(passed_content[0])
+        except:
+            print("Warning: Ignoring invalid page header: " + passed_content[0])
+            header = {}
+
         if "format" in header:
             print("Header detected in the passed pages.jsonl file")
             if "id" in header:

@@ -15,7 +15,11 @@ def check_http_and_https(url, ts, pages_dict):
     :returns: True or False depending on if a match was found
     :rtype: boolean
     """
-    url_body = url.split(":", 1)[1]
+    parts = url.split(":", 1)
+    if len(parts) < 2:
+        return ""
+
+    url_body = parts[1]
     checks = [
         f"http:{url_body}",
         f"https:{url_body}",
@@ -54,25 +58,31 @@ def hash_stream(hash_type, stream):
     return size, hash_type + ":" + hasher.hexdigest()
 
 
-def construct_passed_pages_dict(passed_content):
+def construct_passed_pages_dict(passed_pages_list):
     """Creates a dictionary of the passed pages with the url as the key or ts/url if ts is present and the title and text as the values if they have been passed"""
     passed_pages_dict = {}
-    for i in range(0, len(passed_content)):
+
+    for page_data in passed_pages_list:
+        # Skip invalid page data
+        try:
+            page_dict = json.loads(page_data)
+        except:
+            print("Warning: Skipping invalid page {0}".format(page_data))
+            continue
+
         # Skip the file's header if it's been set
-        header = json.loads(passed_content[i])
-        if "format" not in header:
-            pages_dict = dict(header)
-            url = pages_dict.pop("url", "")
+        if "format" not in page_dict:
+            url = page_dict.pop("url", "")
 
             # Set the default key as url
             key = url
 
             # If timestamp is present overwrite the key to be 'ts/url'
-            if "ts" in pages_dict:
-                key = iso_date_to_timestamp(pages_dict.pop("ts")) + "/" + url
+            if "ts" in page_dict:
+                key = iso_date_to_timestamp(page_dict.pop("ts")) + "/" + url
 
             # Add the key to the dictionary with remaining data
-            passed_pages_dict[key] = pages_dict
+            passed_pages_dict[key] = page_dict
 
     return passed_pages_dict
 
