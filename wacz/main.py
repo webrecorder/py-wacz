@@ -185,10 +185,7 @@ def create_wacz(res):
                 page_json = validateJSON(page_str)
 
                 if not page_json:
-                    print(
-                        "Warning: Ignoring invalid extra page\n %s"
-                        % page_str
-                    )
+                    print("Warning: Ignoring invalid extra page\n %s" % page_str)
                     continue
 
                 extra_page_data.append(page_str.encode("utf-8"))
