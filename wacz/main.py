@@ -167,7 +167,8 @@ def create_wacz(res):
     # If the flag for passed pages has been passed
     if res.pages != None:
         print("Validating passed pages.jsonl file")
-        passed_content = open(res.pages, "r").read().split("\n")
+        with open(res.pages, "r") as fh:
+            passed_content = [line for line in fh]
 
         # Get rid of the blank end line that editors can sometimes add to jsonl files if it's present
         if passed_content[len(passed_content) - 1] == "":
