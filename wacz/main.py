@@ -167,12 +167,17 @@ def create_wacz(res):
     # If the flag for passed pages has been passed
     if res.pages != None:
         print("Validating passed pages.jsonl file")
-        with open(res.pages, "r") as fh:
-            passed_content = [line for line in fh]
+        passed_content = []
+        with open(res.pages, "rb") as fh:
+            for line in fh:
+                if not line:
+                    continue
 
-        # Get rid of the blank end line that editors can sometimes add to jsonl files if it's present
-        if passed_content[len(passed_content) - 1] == "":
-            passed_content.pop()
+                try:
+                    line = line.decode("utf-8")
+                    passed_content.append(line)
+                except:
+                    print("Page data not utf-8 encoded, skipping", line)
 
         # Create a dict of the passed pages that will be used in the construction of the index
         passed_pages_dict = construct_passed_pages_dict(passed_content)
