@@ -292,17 +292,17 @@ def create_wacz(res):
             ),
         )
 
-        if len(wacz_indexer.extra_pages) > 0:
-            wacz_indexer.write_page_list(
-                wacz,
-                EXTRA_PAGES_INDEX,
-                wacz_indexer.serialize_json_pages(
-                    wacz_indexer.extra_pages.values(),
-                    id="extra-pages",
-                    title="Extra Pages",
-                    has_text=wacz_indexer.has_text,
-                ),
-            )
+    if len(wacz_indexer.extra_pages) > 0:
+        wacz_indexer.write_page_list(
+            wacz,
+            EXTRA_PAGES_INDEX,
+            wacz_indexer.serialize_json_pages(
+                wacz_indexer.extra_pages.values(),
+                id="extra-pages",
+                title="Extra Pages",
+                has_text=wacz_indexer.has_text,
+            ),
+        )
 
     if len(wacz_indexer.extra_page_lists) > 0:
         print("Generating extra page lists...")

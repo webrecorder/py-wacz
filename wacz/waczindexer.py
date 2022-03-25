@@ -35,6 +35,8 @@ class WACZIndexer(CDXJIndexer):
         self.has_text = False
         self.main_url = kwargs.pop("main_url", "")
         self.main_ts = kwargs.pop("main_ts", "")
+        self.main_page_entry = None
+        self.main_page_id = None
         self.hash_type = kwargs.pop("hash_type", "")
 
         self.signing_url = kwargs.pop("signing_url", "")
@@ -94,6 +96,10 @@ class WACZIndexer(CDXJIndexer):
 
             if self.passed_pages_dict == {}:
                 print("Num Pages Detected: {0}".format(len(self.pages)))
+
+                if self.split_seeds and self.main_page_entry:
+                    self.extra_pages = self.pages
+                    self.pages = {self.main_page_id: self.main_page_entry}
 
         if (
             hasattr(self, "main_url_flag")
@@ -161,7 +167,7 @@ class WACZIndexer(CDXJIndexer):
                 id_ = page["timestamp"] + "/" + page["url"]
                 self.pages[id_] = page
 
-        self.detect_pages = False
+        #self.detect_pages = False
 
     def extract_page_lists(self, lists):
         for pagelist in lists:
@@ -226,12 +232,16 @@ class WACZIndexer(CDXJIndexer):
             print("Found Main ts: {0}".format(ts))
             # If were not relying on passed in pages we want to add all records to the self.pages object
             if self.passed_pages_dict == {}:
-                self.pages[id_] = {"timestamp": ts, "url": url, "title": url}
+                self.main_page_entry = {"timestamp": ts, "url": url, "title": url, "seed": True}
+                self.main_page_id = id_
+                self.pages[id_] = self.main_page_entry
         if self.main_url and self.main_url == url and self.main_ts == None:
             self.main_url_flag = True
             print("Found Main Url: {0}".format(url))
             if id_ not in self.pages:
-                self.pages[id_] = {"timestamp": ts, "url": url, "title": url}
+                self.main_page_entry = {"timestamp": ts, "url": url, "title": url, "seed": True}
+                self.main_page_id = id_
+                self.pages[id_] = self.main_page_entry
 
         mime = self.get_record_mime_type(record)
 
