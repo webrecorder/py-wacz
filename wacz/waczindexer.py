@@ -167,7 +167,7 @@ class WACZIndexer(CDXJIndexer):
                 id_ = page["timestamp"] + "/" + page["url"]
                 self.pages[id_] = page
 
-        #self.detect_pages = False
+        # self.detect_pages = False
 
     def extract_page_lists(self, lists):
         for pagelist in lists:
@@ -232,14 +232,24 @@ class WACZIndexer(CDXJIndexer):
             print("Found Main ts: {0}".format(ts))
             # If were not relying on passed in pages we want to add all records to the self.pages object
             if self.passed_pages_dict == {}:
-                self.main_page_entry = {"timestamp": ts, "url": url, "title": url, "seed": True}
+                self.main_page_entry = {
+                    "timestamp": ts,
+                    "url": url,
+                    "title": url,
+                    "seed": True,
+                }
                 self.main_page_id = id_
                 self.pages[id_] = self.main_page_entry
         if self.main_url and self.main_url == url and self.main_ts == None:
             self.main_url_flag = True
             print("Found Main Url: {0}".format(url))
             if id_ not in self.pages:
-                self.main_page_entry = {"timestamp": ts, "url": url, "title": url, "seed": True}
+                self.main_page_entry = {
+                    "timestamp": ts,
+                    "url": url,
+                    "title": url,
+                    "seed": True,
+                }
                 self.main_page_id = id_
                 self.pages[id_] = self.main_page_entry
 
