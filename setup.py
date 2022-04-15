@@ -2,7 +2,7 @@
 # vim: set sw=4 et:
 from setuptools import setup, find_packages
 
-__version__ = "0.4.5"
+__version__ = "0.4.6"
 
 
 def load_requirements(filename):
