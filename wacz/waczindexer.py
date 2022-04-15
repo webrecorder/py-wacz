@@ -64,6 +64,7 @@ class WACZIndexer(CDXJIndexer):
             pass
 
         self.detect_pages = kwargs.get("detect_pages")
+        self.detect_referrer_check = True
         self.extract_text = kwargs.get("extract_text")
         if self.extract_text == True and self.detect_pages == False:
             print(
@@ -86,13 +87,14 @@ class WACZIndexer(CDXJIndexer):
         super().process_all()
 
         if self.detect_pages:
-            to_delete = [
-                id_
-                for id_, value in self.pages.items()
-                if value["url"] not in self.referrers
-            ]
-            for delete in to_delete:
-                del self.pages[delete]
+            if self.detect_referrer_check:
+                to_delete = [
+                    id_
+                    for id_, value in self.pages.items()
+                    if value["url"] not in self.referrers
+                ]
+                for delete in to_delete:
+                    del self.pages[delete]
 
             if self.passed_pages_dict == {}:
                 print("Num Pages Detected: {0}".format(len(self.pages)))
@@ -167,7 +169,7 @@ class WACZIndexer(CDXJIndexer):
                 id_ = page["timestamp"] + "/" + page["url"]
                 self.pages[id_] = page
 
-        # self.detect_pages = False
+        self.detect_referrer_check = False
 
     def extract_page_lists(self, lists):
         for pagelist in lists:
