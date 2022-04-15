@@ -148,6 +148,65 @@ class TestWaczIndexing(unittest.TestCase):
                     ],
                 )
 
+    def test_warc_with_detect_pages_split_seeds(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            self.assertEqual(
+                main(
+                    [
+                        "create",
+                        "-f",
+                        os.path.join(TEST_DIR, "example-iana.warc"),
+                        "-o",
+                        os.path.join(tmpdir, "test-detect-extra-pages.wacz"),
+                        "--detect-pages",
+                        "--split-seeds",
+                        "--url",
+                        "https://example.com/"
+                    ]
+                ),
+                0,
+            )
+
+            self.assertEqual(
+                main(
+                    [
+                        "validate",
+                        "-f",
+                        os.path.join(tmpdir, "test-detect-extra-pages.wacz"),
+                    ]
+                ),
+                0,
+            )
+
+            with zipfile.ZipFile(os.path.join(tmpdir, "test-detect-extra-pages.wacz")) as zf:
+                filelist = sorted(zf.namelist())
+
+                # verify pages file added for each list
+                self.assertEqual(
+                    filelist,
+                    [
+                        "archive/example-iana.warc",
+                        "datapackage-digest.json",
+                        "datapackage.json",
+                        "indexes/index.cdx.gz",
+                        "indexes/index.idx",
+                        "pages/extraPages.jsonl",
+                        "pages/pages.jsonl",
+                    ],
+                )
+
+                with zf.open("pages/pages.jsonl", "r") as fh:
+                    data = fh.read()
+
+                    self.assertTrue(b"https://example.com/" in data)
+
+                    self.assertTrue(len(data.strip().split(b"\n")) == 2)
+
+                with zf.open("pages/extraPages.jsonl", "r") as fh:
+                    data = fh.read()
+
+                    self.assertTrue(len(data.strip().split(b"\n")) == 7)
+
     def test_warc_with_extra_pages_via_seeds(self):
         with tempfile.TemporaryDirectory() as tmpdir:
             with open(os.path.join(tmpdir, "pages.jsonl"), "wt") as fh:

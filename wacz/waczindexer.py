@@ -279,7 +279,7 @@ class WACZIndexer(CDXJIndexer):
             return
 
         try:
-            extractor = extractors.ArticleExtractor()
+            extractor = extractors.ArticleExtractor(raise_on_failure=False)
 
             content = content.decode("utf-8")
 
