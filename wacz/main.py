@@ -331,6 +331,8 @@ def create_wacz(res):
         wacz_indexer.generate_datapackage_digest(datapackage_bytes),
     )
 
+    wacz.close()
+
     return 0
 
 
