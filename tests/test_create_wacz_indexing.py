@@ -161,7 +161,7 @@ class TestWaczIndexing(unittest.TestCase):
                         "--detect-pages",
                         "--split-seeds",
                         "--url",
-                        "https://example.com/"
+                        "https://example.com/",
                     ]
                 ),
                 0,
@@ -178,7 +178,9 @@ class TestWaczIndexing(unittest.TestCase):
                 0,
             )
 
-            with zipfile.ZipFile(os.path.join(tmpdir, "test-detect-extra-pages.wacz")) as zf:
+            with zipfile.ZipFile(
+                os.path.join(tmpdir, "test-detect-extra-pages.wacz")
+            ) as zf:
                 filelist = sorted(zf.namelist())
 
                 # verify pages file added for each list
