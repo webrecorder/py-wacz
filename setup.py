@@ -17,7 +17,7 @@ setup(
     author_email="info@webrecorder.net",
     license="Apache 2.0",
     packages=find_packages(exclude=["test"]),
-    url="https://github.com/webrecorder/wacz-format",
+    url="https://github.com/webrecorder/py-wacz",
     description="WACZ Format Tools",
     long_description="Create and validate web archive data packaged using WACZ",
     install_requires=load_requirements("requirements.txt"),
