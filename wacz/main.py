@@ -210,7 +210,7 @@ def create_wacz(res):
             compress=data,
             lines=DEFAULT_NUM_LINES,
             digest_records=True,
-            fields="referrer",
+            fields="referrer,req.http:cookie",
             data_out_name="index.cdx.gz",
             hash_type=res.hash_type,
             main_url=res.url,
