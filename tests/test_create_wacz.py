@@ -140,7 +140,7 @@ class TestWaczFormat(unittest.TestCase):
             )
         )
         self.assertTrue(
-            content.startswith(
+            second_content.startswith(
                 b'{"logLevel":"info","timestamp":"2023-02-23T23:44:39.665Z","context":"general","message":"Page context being used with 1 worker","details":{}}\n'
             )
         )
@@ -150,7 +150,7 @@ class TestWaczFormat(unittest.TestCase):
         f = open(self.wacz_json, "rb")
         json_parse = json.loads(f.read())
         # Make sure it's recording the correct number of resources
-        self.assertEqual(len(json_parse["resources"]), 5)
+        self.assertEqual(len(json_parse["resources"]), 6)
 
         # Check that the correct hash was recorded for a warc
         original_warc = hash_file("sha256", self.warc_file)
