@@ -264,7 +264,6 @@ class WACZIndexer(CDXJIndexer):
             return
 
         if id_ not in self.pages:
-
             if self.detect_pages:
                 self.pages[id_] = {"timestamp": ts, "url": url, "title": url}
             else:
