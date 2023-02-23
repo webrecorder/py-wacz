@@ -64,6 +64,9 @@ class TestWaczFormat(unittest.TestCase):
         self.wacz_log = os.path.join(
             self.tmpdir.name, "unzipped_wacz_1/logs/wr-specs-crawl.log"
         )
+        self.wacz_second_log = os.path.join(
+            self.tmpdir.name, "unzipped_wacz_1/logs/wr-crawl.log"
+        )
 
     def test_components(self):
         """Check that the basic components of a wacz file exist"""
@@ -122,14 +125,23 @@ class TestWaczFormat(unittest.TestCase):
             'com,example)/ 20201007212236 {"url": "http://www.example.com/", "mime": "text/html", "status": "200", "digest": "sha1:WJM2KPM4GF3QK2BISVUH2ASX64NOUY7L", "length": "1293", "offset": "845", "filename": "example-collection.warc", "recordDigest": "sha256:f78838ace891c96f7a6299e9e085b55a5aba8950a6d77f0f2e9ffe90f63255f2"}\n',
         )
 
-    def test_log(self):
+    def test_logs(self):
         with open(self.wacz_log, "rb") as f:
             content = f.read()
+        f.close()
+
+        with open(self.wacz_second_log, "rb") as f:
+            second_content = f.read()
         f.close()
 
         self.assertTrue(
             content.startswith(
                 b'{"logLevel":"info","timestamp":"2023-02-23T20:29:36.908Z","context":"general","message":"Seeds","details":[{"url":"https://specs.webrecorder.net/","include":[{}],"exclude":[],"scopeType":"prefix","sitemap":false,"allowHash":false,"maxExtraHops":0,"maxDepth":99999}]}\n',
+            )
+        )
+        self.assertTrue(
+            content.startswith(
+                b'{"logLevel":"info","timestamp":"2023-02-23T23:44:39.665Z","context":"general","message":"Page context being used with 1 worker","details":{}}\n'
             )
         )
 
@@ -158,10 +170,14 @@ class TestWaczFormat(unittest.TestCase):
         cdx_resource = self.find_resource(json_parse["resources"], "cdx")
         self.assertEqual(original_wacz_index_cdx, cdx_resource["hash"])
 
-        # Check that the correct hash was recorded for the log file
+        # Check that the correct hash was recorded for the log files
         original_wacz_log = hash_file("sha256", self.wacz_log)
         log_resource = self.find_resource(json_parse["resources"], "wr-specs-crawl.log")
         self.assertEqual(original_wacz_log, log_resource["hash"])
+
+        second_wacz_log = hash_file("sha256", self.wacz_second_log)
+        log_resource = self.find_resource(json_parse["resources"], "wr-crawl.log")
+        self.assertEqual(second_wacz_log, log_resource["hash"])
 
         # Use frictionless validation
         valid = validate(self.wacz_json)

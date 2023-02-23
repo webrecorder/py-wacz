@@ -1,0 +1,17 @@
+{"logLevel":"info","timestamp":"2023-02-23T23:44:39.665Z","context":"general","message":"Page context being used with 1 worker","details":{}}
+{"logLevel":"info","timestamp":"2023-02-23T23:44:39.666Z","context":"general","message":"Set netIdleWait to 15 seconds","details":{}}
+{"logLevel":"info","timestamp":"2023-02-23T23:44:39.666Z","context":"general","message":"Seeds","details":[{"url":"https://webrecorder.net/","include":[],"exclude":[],"scopeType":"page","sitemap":false,"allowHash":false,"maxExtraHops":0,"maxDepth":99999}]}
+{"logLevel":"info","timestamp":"2023-02-23T23:44:40.016Z","context":"state","message":"Storing state in memory","details":{}}
+{"logLevel":"info","timestamp":"2023-02-23T23:44:40.473Z","context":"general","message":"Text Extraction: Disabled","details":{}}
+{"logLevel":"info","timestamp":"2023-02-23T23:44:40.590Z","context":"crawlStatus","message":"Crawl statistics","details":{"crawled":0,"total":1,"pending":1,"limit":{"max":0,"hit":false},"pendingPages":["{\"url\":\"https://webrecorder.net/\",\"seedId\":0,\"depth\":0,\"started\":\"2023-02-23T23:44:40.517Z\"}"]}}
+{"logLevel":"error","timestamp":"2023-02-23T23:44:43.279Z","context":"general","message":"Invalid Seed \"mailto:info@webrecorder.net\" - URL must start with http:// or https://","details":{}}
+{"logLevel":"info","timestamp":"2023-02-23T23:44:43.286Z","context":"behavior","message":"Behaviors started","details":{"behaviorTimeout":90,"page":"https://webrecorder.net/"}}
+{"logLevel":"info","timestamp":"2023-02-23T23:44:43.287Z","context":"behavior","message":"Run Script Started","details":{"url":"https://webrecorder.net/","page":"https://webrecorder.net/"}}
+{"logLevel":"info","timestamp":"2023-02-23T23:44:43.291Z","context":"behaviorScript","message":"Behavior log","details":{"state":{"segments":1},"msg":"Skipping autoscroll, page seems to not be responsive to scrolling events","page":"https://webrecorder.net/"}}
+{"logLevel":"info","timestamp":"2023-02-23T23:44:43.291Z","context":"behaviorScript","message":"Behavior log","details":{"state":{"segments":1},"msg":"done!","page":"https://webrecorder.net/"}}
+{"logLevel":"info","timestamp":"2023-02-23T23:44:43.293Z","context":"behavior","message":"Run Script Finished","details":{"url":"https://webrecorder.net/","page":"https://webrecorder.net/"}}
+{"logLevel":"info","timestamp":"2023-02-23T23:44:43.293Z","context":"behavior","message":"Behaviors finished","details":{"finished":1,"page":"https://webrecorder.net/"}}
+{"logLevel":"info","timestamp":"2023-02-23T23:44:43.293Z","context":"pageStatus","message":"Page finished","details":{"page":"https://webrecorder.net/"}}
+{"logLevel":"info","timestamp":"2023-02-23T23:44:43.358Z","context":"crawlStatus","message":"Crawl statistics","details":{"crawled":1,"total":1,"pending":0,"limit":{"max":0,"hit":false},"pendingPages":[]}}
+{"logLevel":"info","timestamp":"2023-02-23T23:44:43.358Z","context":"general","message":"Waiting to ensure pending data is written to WARCs...","details":{}}
+{"logLevel":"info","timestamp":"2023-02-23T23:44:43.364Z","context":"general","message":"Crawl status: done","details":{}}
