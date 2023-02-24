@@ -4,11 +4,13 @@ from setuptools import setup, find_packages
 
 __version__ = "0.4.8"
 
-
 def load_requirements(filename):
     with open(filename, "rt") as fh:
         return fh.read().rstrip().split("\n")
 
+def long_description():
+    with open("README.md") as f:
+        return f.read()
 
 setup(
     name="wacz",
@@ -17,9 +19,10 @@ setup(
     author_email="info@webrecorder.net",
     license="Apache 2.0",
     packages=find_packages(exclude=["test"]),
-    url="https://github.com/webrecorder/wacz-format",
+    url="https://github.com/webrecorder/py-wacz",
     description="WACZ Format Tools",
-    long_description="Create and validate web archive data packaged using WACZ",
+    long_description=long_description(),
+    long_description_content_type="text/markdown",
     install_requires=load_requirements("requirements.txt"),
     extras_require={"signing": ["authsign>=0.3.1", "requests"]},
     zip_safe=True,
