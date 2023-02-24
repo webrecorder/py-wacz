@@ -79,6 +79,14 @@ You can add a full text index by including the --text tag.
 wacz create tests/fixtures/example-collection.warc -p passed_pages.jsonl --text
 ```
 
+### -l --log-directory
+
+Adds log files in specified directory to WACZ
+
+```
+wacz create tests/fixtures/example-collection.warc -l tests/fixtures/logs
+```
+
 ### --ts
 
 Overrides the ts metadata value in the datapackage.json file.
