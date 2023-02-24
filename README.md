@@ -41,7 +41,7 @@ wacz create -f tests/fixtures/example-collection.warc
 
 ### -o --output
 
-Explicitly declare the name of the wacz being created
+Explicitly declare the name of the wacz being created.
 
 ```
 wacz create tests/fixtures/example-collection.warc -o mywacz.wacz
@@ -49,7 +49,7 @@ wacz create tests/fixtures/example-collection.warc -o mywacz.wacz
 
 ### -t --text
 
-Generates pages.jsonl page index with a full-text index, must be run in conjunction with --detect-pages. Will have no effect if run alone
+Generates pages.jsonl page index with a full-text index, must be run in conjunction with --detect-pages. Will have no effect if run alone.
 
 ```
 wacz create tests/fixtures/example-collection.warc -t
@@ -57,7 +57,7 @@ wacz create tests/fixtures/example-collection.warc -t
 
 ### --detect-pages
 
-Generates pages.jsonl page index without a full-text index
+Generates pages.jsonl page index without a full-text index.
 
 ```
 wacz create tests/fixtures/example-collection.warc --detect-pages
@@ -73,7 +73,7 @@ wacz create tests/fixtures/example-collection.warc -p passed_pages.jsonl
 
 ### -t --text
 
-You can add a full text index by including the --text tag
+You can add a full text index by including the --text tag.
 
 ```
 wacz create tests/fixtures/example-collection.warc -p passed_pages.jsonl --text
@@ -81,7 +81,7 @@ wacz create tests/fixtures/example-collection.warc -p passed_pages.jsonl --text
 
 ### --ts
 
-Overrides the ts metadata value in the datapackage.json file
+Overrides the ts metadata value in the datapackage.json file.
 
 ```
 wacz create tests/fixtures/example-collection.warc --ts TIMESTAMP
@@ -89,7 +89,7 @@ wacz create tests/fixtures/example-collection.warc --ts TIMESTAMP
 
 ### --url
 
-Overrides the url metadata value in the datapackage.json file
+Overrides the url metadata value in the datapackage.json file.
 
 ```
 wacz create tests/fixtures/example-collection.warc --url URL
@@ -97,7 +97,7 @@ wacz create tests/fixtures/example-collection.warc --url URL
 
 ### --title
 
-Overrides the titles metadata value in the datapackage.json file
+Overrides the titles metadata value in the datapackage.json file.
 
 ```
 wacz create tests/fixtures/example-collection.warc --title TITLE
@@ -105,7 +105,7 @@ wacz create tests/fixtures/example-collection.warc --title TITLE
 
 ### --desc
 
-Overrides the desc metadata value in the datapackage.json file
+Overrides the desc metadata value in the datapackage.json file.
 
 ```
 wacz create tests/fixtures/example-collection.warc --desc DESC
@@ -113,7 +113,7 @@ wacz create tests/fixtures/example-collection.warc --desc DESC
  
 ### --hash-type
 
-Allows the user to specify the hash type used:  (sha256 or md5):
+Allows the user to specify the hash type used (sha256 or md5).
 
 ```
 wacz create tests/fixtures/example-collection.warc --hash-type md5
@@ -160,7 +160,7 @@ To run locally, the `authsign` must be installed, which can be done by running `
 
 See [WACZ Authentication Spec](https://github.com/webrecorder/wacz-auth-spec) on WACZ authentication.
 
-This feature and the specification are still in development (alpha-quality) and is subject to change.
+This feature and the specification are still in development (alpha-quality) and are subject to change.
 
 
 
