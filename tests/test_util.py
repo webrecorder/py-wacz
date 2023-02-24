@@ -23,7 +23,7 @@ class TestUtilFunctions(unittest.TestCase):
         self.assertEqual(hash_, test_hash)
 
     def test_util_validate_json_succeed(self):
-        """validate json method should succed with valid json"""
+        """validate json method should succeed with valid json"""
         self.assertTrue(validateJSON('{"test": "test"}'))
 
     def test_util_validate_json_fail(self):
