@@ -65,6 +65,13 @@ def main(args=None):
         help="Allows the user to specify the hash type used. Currently we allow sha256 and md5",
     )
 
+    create.add_argument(
+        "-l",
+        "--log-directory",
+        help="Adds log files in specified directory to WACZ",
+        action="store",
+    )
+
     create.add_argument("--split-seeds", action="store_true")
 
     create.add_argument("--ts")
@@ -210,7 +217,7 @@ def create_wacz(res):
             compress=data,
             lines=DEFAULT_NUM_LINES,
             digest_records=True,
-            fields="referrer",
+            fields="referrer,req.http:cookie",
             data_out_name="index.cdx.gz",
             hash_type=res.hash_type,
             main_url=res.url,
@@ -246,6 +253,19 @@ def create_wacz(res):
             print(
                 "Invalid passed page. We were unable to find a match for %s" % str(key)
             )
+
+    if res.log_directory:
+        print("Writing logs...")
+        log_dir = os.path.abspath(res.log_directory)
+        for log_file in os.listdir(log_dir):
+            log_path = os.path.join(log_dir, log_file)
+            log_wacz_file = zipfile.ZipInfo.from_file(
+                log_path, "logs/{}".format(log_file)
+            )
+            with wacz.open(log_wacz_file, "w") as out_fh:
+                with open(log_path, "rb") as in_fh:
+                    shutil.copyfileobj(in_fh, out_fh)
+                    path = "logs/{}".format(log_file)
 
     if len(wacz_indexer.pages) > 0 and res.pages == None:
         print("Generating page index...")

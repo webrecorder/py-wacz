@@ -1,3 +1,12 @@
+# 0.4.8
+
+- Add -l/--log-directory option to add logs directory to WACZ
+
+# 0.4.7
+
+- include request cookie in cdxj via 'req.http:cookie' field (#27)
+- fix Click dependency version
+
 # 0.4.6
 
 - wacz zip write: ensure zip file is fully closed on exit (fixes #20
