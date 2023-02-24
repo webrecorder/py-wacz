@@ -1,8 +1,11 @@
+# 0.4.8
+
+- Add -l/--log-directory option to add logs directory to WACZ
+
 # 0.4.7
 
 - include request cookie in cdxj via 'req.http:cookie' field (#27)
 - fix Click dependency version
-- Add -l/--log-directory option to add logs directory to WACZ
 
 # 0.4.6
 
