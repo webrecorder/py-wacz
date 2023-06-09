@@ -72,13 +72,11 @@ def construct_passed_pages_dict(passed_pages_list):
 
         # Skip the file's header if it's been set
         if "format" not in page_dict:
-            url = page_dict.pop("url", "")
+            url = page_dict.get("url", "")
 
-            # strip out hashtag from page, will be matching URLs without it
-            url = url.split("#", 1)[0]
-
-            # Set the default key as url
-            key = url
+            # Set the default key as url, but without hashtag, as will match pages
+            # to URLs without hashtag, but keep hashtag on page list
+            key = url.split("#", 1)[0]
 
             # If timestamp is present overwrite the key to be 'ts/url'
             if "ts" in page_dict:
