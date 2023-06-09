@@ -74,6 +74,9 @@ def construct_passed_pages_dict(passed_pages_list):
         if "format" not in page_dict:
             url = page_dict.pop("url", "")
 
+            # strip out hashtag from page, will be matching URLs without it
+            url = url.split("#", 1)[0]
+
             # Set the default key as url
             key = url
 
