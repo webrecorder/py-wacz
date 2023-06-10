@@ -339,7 +339,6 @@ class WACZIndexer(CDXJIndexer):
 
             line["id"] = line.get("id") or line.get("page_id") or shortuuid.uuid()
 
-
             yield json.dumps(line) + "\n"
 
     def generate_datapackage(self, res, wacz):
