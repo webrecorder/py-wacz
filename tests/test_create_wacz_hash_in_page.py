@@ -6,6 +6,7 @@ from frictionless import validate, Report
 
 TEST_DIR = os.path.join(os.path.dirname(os.path.realpath(__file__)), "fixtures")
 
+
 class TestWaczFor(unittest.TestCase):
     @classmethod
     @patch("wacz.main.now")
@@ -14,7 +15,9 @@ class TestWaczFor(unittest.TestCase):
         self.tmpdir = tempfile.TemporaryDirectory()
         with open(os.path.join(self.tmpdir.name, "test-pages.jsonl"), "wt") as fh:
             fh.write('{"format": "json-pages-1.0", "id": "pages", "title": "Pages"}\n')
-            fh.write('{"id": "abcdef", "url": "https://www.example.com/#hashtag", "title": "Example", "loadState": 4}\n')
+            fh.write(
+                '{"id": "abcdef", "url": "https://www.example.com/#hashtag", "title": "Example", "loadState": 4}\n'
+            )
 
         main(
             [
@@ -24,21 +27,32 @@ class TestWaczFor(unittest.TestCase):
                 "-p",
                 os.path.join(self.tmpdir.name, "test-pages.jsonl"),
                 "-o",
-                os.path.join(self.tmpdir.name, "example-custom-page.wacz")
+                os.path.join(self.tmpdir.name, "example-custom-page.wacz"),
             ]
         )
 
     def test_hash(self):
-        with zipfile.ZipFile(os.path.join(self.tmpdir.name, "example-custom-page.wacz"), "r") as zip_ref:
-            zip_ref.extract("pages/pages.jsonl", os.path.join(self.tmpdir.name, "extract-custom-page"))
+        with zipfile.ZipFile(
+            os.path.join(self.tmpdir.name, "example-custom-page.wacz"), "r"
+        ) as zip_ref:
+            zip_ref.extract(
+                "pages/pages.jsonl",
+                os.path.join(self.tmpdir.name, "extract-custom-page"),
+            )
             zip_ref.close()
 
-        with open(os.path.join(self.tmpdir.name, "extract-custom-page", "pages", "pages.jsonl"), "rt") as f:
+        with open(
+            os.path.join(
+                self.tmpdir.name, "extract-custom-page", "pages", "pages.jsonl"
+            ),
+            "rt",
+        ) as f:
             content = f.read()
 
-        assert content == """\
+        assert (
+            content
+            == """\
 {"format": "json-pages-1.0", "id": "pages", "title": "Pages"}
 {"id": "abcdef", "url": "https://www.example.com/#hashtag", "title": "Example", "loadState": 4, "ts": "2020-10-07T21:22:36Z"}
 """
-
-
+        )
