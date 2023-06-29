@@ -205,19 +205,17 @@ class WACZIndexer(CDXJIndexer):
         matched_id = check_http_and_https(url, ts, self.passed_pages_dict)
         # If we find a match build a record
         if matched_id:
-            new_page = {"timestamp": ts, "url": url, "title": url}
-            input_page = self.passed_pages_dict[matched_id]
+            page_data = self.passed_pages_dict[matched_id]
+            page_data["timestamp"] = ts
+            if "url" not in page_data:
+                page_data["url"] = url
+            if "title" not in page_data:
+                page_data["title"] = url
 
-            # Add title and text if they've been provided
-            if "title" in input_page:
-                new_page["title"] = input_page["title"]
-            if "text" in self.passed_pages_dict[matched_id]:
-                new_page["text"] = input_page["text"]
-
-            if self.split_seeds and not input_page.get("seed"):
-                self.extra_pages[matched_id] = new_page
+            if self.split_seeds and not page_data.get("seed"):
+                self.extra_pages[matched_id] = page_data
             else:
-                self.pages[matched_id] = new_page
+                self.pages[matched_id] = page_data
 
             # Delete the entry from our pages_dict so we can't match it again
             del self.passed_pages_dict[matched_id]
@@ -334,20 +332,14 @@ class WACZIndexer(CDXJIndexer):
         yield json.dumps(page_header) + "\n"
 
         for line in pages:
-            ts = timestamp_to_iso_date(line["timestamp"])
-            page_title = line.get("title")
+            if "ts" not in line and "timestamp" in line:
+                ts = timestamp_to_iso_date(line["timestamp"])
+                line["ts"] = ts
+                del line["timestamp"]
 
-            uid = line.get("id") or line.get("page_id") or shortuuid.uuid()
+            line["id"] = line.get("id") or line.get("page_id") or shortuuid.uuid()
 
-            data = {"id": uid, "url": line["url"], "ts": ts}
-
-            if page_title:
-                data["title"] = page_title
-
-            if "text" in line:
-                data["text"] = line["text"]
-
-            yield json.dumps(data) + "\n"
+            yield json.dumps(line) + "\n"
 
     def generate_datapackage(self, res, wacz):
         package_dict = {}
