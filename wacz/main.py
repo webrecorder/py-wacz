@@ -1,11 +1,12 @@
 from argparse import ArgumentParser, RawTextHelpFormatter
 from io import BytesIO, StringIO, TextIOWrapper
-import os, json, datetime, shutil, zipfile, sys, gzip, pkg_resources
+import os, json, datetime, shutil, zipfile, sys, gzip, pkg_resources, zlib
 from wacz.waczindexer import WACZIndexer
 from wacz.util import now, WACZ_VERSION, construct_passed_pages_dict
 from wacz.validate import Validation, OUTDATED_WACZ
 from wacz.util import validateJSON, get_py_wacz_version
 from warcio.timeutils import iso_date_to_timestamp
+from warcio.bufferedreaders import DecompressingBufferedReader
 
 """
 WACZ Generator
@@ -103,6 +104,10 @@ def main(args=None):
         help="URL of verify server to verify the signature, if any, in dapackage-digest.json",
     )
 
+    index = subparsers.add_parser("index", help="generate a WACZ-level CDXJ index")
+    index.add_argument("-f", "--file", required=True)
+    index.set_defaults(func=index_wacz)
+
     cmd = parser.parse_args(args=args)
 
     if cmd.cmd == "create" and cmd.ts is not None and cmd.url is None:
@@ -153,6 +158,51 @@ def validate_wacz(res):
     print("Validation Succeeded the passed Wacz is valid")
     return 0
 
+
+def index_wacz(res):
+
+    # Open up the ZIP:
+    with zipfile.ZipFile(res.file) as zf:
+
+        # Determine the WACZ filename/path to use:
+        wacz_path = os.path.basename(res.file)
+        # TODO Add option to override prefix
+
+        # Get a look-up table for offsets for each archive file:
+        archive_offsets = {}
+        archives_prefix = "archive/"
+        for zinfo in zf.infolist():
+            #print(f'{zinfo.filename}: offset {zinfo.header_offset} compress_type {zinfo.compress_type}')
+            if zinfo.filename.startswith(archives_prefix):
+                archive_name = zinfo.filename[len(archives_prefix):]
+                archive_offsets[archive_name] = zinfo.header_offset + len(zinfo.FileHeader())
+                if zinfo.compress_type != 0:
+                    raise Exception("Can't generate WACZ-level index from compressed WARC records! This file does not conform to the WACZ standard!")
+
+        # Stream through the index in the WACZ:
+        index_file = "indexes/index.cdx.gz"
+        zinfo = zf.getinfo(index_file)
+        print(f'{zinfo.filename}: offset {zinfo.header_offset}')
+        with zf.open(index_file) as f:
+            reader = DecompressingBufferedReader(f)
+            while True:
+                line = reader.readline()
+                # If we reach the end, end:
+                if len(line) == 0:
+                    break
+                # Otherwise, decode the line:
+                surt, timestamp, json_data_str = line.decode('utf-8').rstrip('\n').split(' ', maxsplit=2)
+                json_data = json.loads(json_data_str)
+                # Override the offset to include of file offset in the ZIP
+                archive_filename = json_data['filename']
+                archive_offset = json_data['offset']
+                json_data['offset'] = archive_offsets[archive_filename] + int(archive_offset)
+                #json_data['original_offset'] = archive_offset
+                # Also override the filename to point at the WACZ
+                json_data['filename'] = wacz_path
+                #json_data['original_filename'] = archive_filename
+                # Output the modified values:
+                print(f"{surt} {timestamp} {json.dumps(json_data)}")
 
 def create_wacz(res):
     wacz = zipfile.ZipFile(res.output, "w")
