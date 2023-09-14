@@ -217,14 +217,14 @@ def index_wacz(res):
                         line.decode("utf-8").rstrip("\n").split(" ", maxsplit=2)
                     )
                     json_data = json.loads(json_data_str)
-                    # Override the offset to include of file offset in the ZIP
+                    # Also override the filename to point at the WACZ:
                     archive_filename = json_data["filename"]
+                    json_data["filename"] = wacz_path
+                    # Override the offset to include of file offset in the ZIP:
                     archive_offset = json_data["offset"]
                     json_data["offset"] = archive_offsets[archive_filename] + int(
                         archive_offset
                     )
-                    # Also override the filename to point at the WACZ
-                    json_data["filename"] = wacz_path
                     # Output the modified values:
                     f_out.write(f"{surt} {timestamp} {json.dumps(json_data)}\n")
 
