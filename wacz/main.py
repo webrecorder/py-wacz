@@ -160,10 +160,8 @@ def validate_wacz(res):
 
 
 def index_wacz(res):
-
     # Open up the ZIP:
     with zipfile.ZipFile(res.file) as zf:
-
         # Determine the WACZ filename/path to use:
         wacz_path = os.path.basename(res.file)
         # TODO Add option to override prefix
@@ -172,17 +170,21 @@ def index_wacz(res):
         archive_offsets = {}
         archives_prefix = "archive/"
         for zinfo in zf.infolist():
-            #print(f'{zinfo.filename}: offset {zinfo.header_offset} compress_type {zinfo.compress_type}')
+            # print(f'{zinfo.filename}: offset {zinfo.header_offset} compress_type {zinfo.compress_type}')
             if zinfo.filename.startswith(archives_prefix):
-                archive_name = zinfo.filename[len(archives_prefix):]
-                archive_offsets[archive_name] = zinfo.header_offset + len(zinfo.FileHeader())
+                archive_name = zinfo.filename[len(archives_prefix) :]
+                archive_offsets[archive_name] = zinfo.header_offset + len(
+                    zinfo.FileHeader()
+                )
                 if zinfo.compress_type != 0:
-                    raise Exception("Can't generate WACZ-level index from compressed WARC records! This file does not conform to the WACZ standard!")
+                    raise Exception(
+                        "Can't generate WACZ-level index from compressed WARC records! This file does not conform to the WACZ standard!"
+                    )
 
         # Stream through the index in the WACZ:
         index_file = "indexes/index.cdx.gz"
         zinfo = zf.getinfo(index_file)
-        print(f'{zinfo.filename}: offset {zinfo.header_offset}')
+        # print(f"{zinfo.filename}: offset {zinfo.header_offset}")
         with zf.open(index_file) as f:
             reader = DecompressingBufferedReader(f)
             while True:
@@ -191,18 +193,23 @@ def index_wacz(res):
                 if len(line) == 0:
                     break
                 # Otherwise, decode the line:
-                surt, timestamp, json_data_str = line.decode('utf-8').rstrip('\n').split(' ', maxsplit=2)
+                surt, timestamp, json_data_str = (
+                    line.decode("utf-8").rstrip("\n").split(" ", maxsplit=2)
+                )
                 json_data = json.loads(json_data_str)
                 # Override the offset to include of file offset in the ZIP
-                archive_filename = json_data['filename']
-                archive_offset = json_data['offset']
-                json_data['offset'] = archive_offsets[archive_filename] + int(archive_offset)
-                #json_data['original_offset'] = archive_offset
+                archive_filename = json_data["filename"]
+                archive_offset = json_data["offset"]
+                json_data["offset"] = archive_offsets[archive_filename] + int(
+                    archive_offset
+                )
+                # json_data['original_offset'] = archive_offset
                 # Also override the filename to point at the WACZ
-                json_data['filename'] = wacz_path
-                #json_data['original_filename'] = archive_filename
+                json_data["filename"] = wacz_path
+                # json_data['original_filename'] = archive_filename
                 # Output the modified values:
                 print(f"{surt} {timestamp} {json.dumps(json_data)}")
+
 
 def create_wacz(res):
     wacz = zipfile.ZipFile(res.output, "w")
