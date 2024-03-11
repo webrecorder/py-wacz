@@ -71,6 +71,14 @@ Overrides the pages index generation with the passed jsonl pages.
 wacz create tests/fixtures/example-collection.warc -p passed_pages.jsonl
 ```
 
+### --pages-file
+
+Overrides the pages index generation by copying existing pages.jsonl and/or extraPages.jsonl directly into the WACZ. Incompatible with --detect-pages and -p/--pages options.
+
+```
+wacz create tests/fixtures/example-collection.warc --pages-file pages/pages.jsonl --pages-file pages/extraPages.jsonl
+```
+
 ### -t --text
 
 You can add a full text index by including the --text tag.

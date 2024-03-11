@@ -60,6 +60,12 @@ def main(args=None):
     )
 
     create.add_argument(
+        "--pages-file",
+        help="Overrides the pages generation by copying files to WACZ without parsing",
+        nargs="+"
+    )
+
+    create.add_argument(
         "--hash-type",
         choices=["sha256", "md5"],
         help="Allows the user to specify the hash type used. Currently we allow sha256 and md5",
@@ -108,10 +114,13 @@ def main(args=None):
     if cmd.cmd == "create" and cmd.ts is not None and cmd.url is None:
         parser.error("--url must be specified when --ts is passed")
 
-    if cmd.cmd == "create" and cmd.detect_pages is not False and cmd.pages is not None:
+    if cmd.cmd == "create" and cmd.detect_pages is not False and (cmd.pages is not None or cmd.pages_file is not None):
         parser.error(
-            "--pages and --detect-pages can't be set at the same time they cancel each other out."
+            "--pages/--pages-file and --detect-pages can't be set at the same time they cancel each other out."
         )
+
+    if cmd.cmd == "create" and cmd.pages is not None and cmd.pages_file is not None:
+        parser.error("--pages and --pages-file can't be set at same time as they cancel each other out.")
 
     value = cmd.func(cmd)
     return value
@@ -163,6 +172,9 @@ def create_wacz(res):
     index_file = zipfile.ZipInfo("indexes/index.idx", now())
     index_file.compress_type = zipfile.ZIP_DEFLATED
 
+    pages_jsonl = zipfile.ZipInfo("pages/pages.jsonl", now())
+    extra_pages_jsonl = zipfile.ZipInfo("pages/extraPages.jsonl", now())
+
     index_buff = BytesIO()
 
     text_wrap = TextIOWrapper(index_buff, "utf-8", write_through=True)
@@ -171,7 +183,22 @@ def create_wacz(res):
 
     passed_pages_dict = {}
 
-    # If the flag for passed pages has been passed
+    # Handle pages
+    if res.pages_file is not None:
+        for page_file in res.pages_file:
+            page_file = os.path.abspath(page_file)
+            filename = os.path.basename(page_file)
+
+            if filename == "pages.jsonl":
+                with wacz.open(pages_jsonl, "w") as page_jsonl_file:
+                    with open(page_file, "rb") as in_fh:
+                        shutil.copyfileobj(in_fh, page_jsonl_file)
+    
+            if filename == "extraPages.jsonl":
+                with wacz.open(extra_pages_jsonl, "w") as extra_page_file:
+                    with open(page_file, "rb") as in_fh:
+                        shutil.copyfileobj(in_fh, extra_page_file)
+
     if res.pages != None:
         print("Validating passed pages.jsonl file")
         passed_content = []
@@ -267,7 +294,7 @@ def create_wacz(res):
                     shutil.copyfileobj(in_fh, out_fh)
                     path = "logs/{}".format(log_file)
 
-    if len(wacz_indexer.pages) > 0 and res.pages == None:
+    if len(wacz_indexer.pages) > 0 and res.pages == None and res.pages_file is None:
         print("Generating page index...")
         # generate pages/text
         wacz_indexer.write_page_list(
@@ -281,7 +308,7 @@ def create_wacz(res):
             ),
         )
 
-    if len(wacz_indexer.pages) > 0 and res.pages != None:
+    if len(wacz_indexer.pages) > 0 and res.pages != None and res.pages_file is None:
         print("Generating page index from passed pages...")
         # Initially set the default value of the header id and title
         id_value = "pages"
@@ -312,7 +339,7 @@ def create_wacz(res):
             ),
         )
 
-    if len(wacz_indexer.extra_pages) > 0:
+    if len(wacz_indexer.extra_pages) > 0 and res.pages_file is None:
         wacz_indexer.write_page_list(
             wacz,
             EXTRA_PAGES_INDEX,
@@ -324,7 +351,7 @@ def create_wacz(res):
             ),
         )
 
-    if len(wacz_indexer.extra_page_lists) > 0:
+    if len(wacz_indexer.extra_page_lists) > 0 and res.pages_file is None:
         print("Generating extra page lists...")
 
         for name, pagelist in wacz_indexer.extra_page_lists.items():
