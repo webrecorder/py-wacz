@@ -62,7 +62,7 @@ def main(args=None):
     create.add_argument(
         "--pages-file",
         help="Overrides the pages generation by copying files to WACZ without parsing",
-        nargs="+"
+        nargs="+",
     )
 
     create.add_argument(
@@ -114,13 +114,19 @@ def main(args=None):
     if cmd.cmd == "create" and cmd.ts is not None and cmd.url is None:
         parser.error("--url must be specified when --ts is passed")
 
-    if cmd.cmd == "create" and cmd.detect_pages is not False and (cmd.pages is not None or cmd.pages_file is not None):
+    if (
+        cmd.cmd == "create"
+        and cmd.detect_pages is not False
+        and (cmd.pages is not None or cmd.pages_file is not None)
+    ):
         parser.error(
             "--pages/--pages-file and --detect-pages can't be set at the same time they cancel each other out."
         )
 
     if cmd.cmd == "create" and cmd.pages is not None and cmd.pages_file is not None:
-        parser.error("--pages and --pages-file can't be set at same time as they cancel each other out.")
+        parser.error(
+            "--pages and --pages-file can't be set at same time as they cancel each other out."
+        )
 
     value = cmd.func(cmd)
     return value
@@ -193,7 +199,7 @@ def create_wacz(res):
                 with wacz.open(pages_jsonl, "w") as page_jsonl_file:
                     with open(page_file, "rb") as in_fh:
                         shutil.copyfileobj(in_fh, page_jsonl_file)
-    
+
             if filename == "extraPages.jsonl":
                 with wacz.open(extra_pages_jsonl, "w") as extra_page_file:
                     with open(page_file, "rb") as in_fh:
