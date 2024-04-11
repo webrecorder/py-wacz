@@ -81,7 +81,7 @@ wacz create tests/fixtures/example-collection.warc -p passed_pages.jsonl -e extr
 
 ### -c --copy-pages
 
-Overrides the behavior of --pages and --extra-pages options to copy existing pages.jsonl and/or extraPages.jsonl as-is directly into the WACZ rather than parsing their contents.
+Overrides the behavior of --pages and --extra-pages options to copy existing pages.jsonl and/or extraPages.jsonl as-is directly into the WACZ rather than attempting to match each page to WARC record. The files are still parsed for basic correctness.
 
 ```
 wacz create tests/fixtures/example-collection.warc --pages pages/pages.jsonl --extra-pages pages/extraPages.jsonl --copy-pages
