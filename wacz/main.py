@@ -170,9 +170,6 @@ def create_wacz(res):
     index_file = zipfile.ZipInfo("indexes/index.idx", now())
     index_file.compress_type = zipfile.ZIP_DEFLATED
 
-    pages_jsonl = zipfile.ZipInfo("pages/pages.jsonl", now())
-    extra_pages_jsonl = zipfile.ZipInfo("pages/extraPages.jsonl", now())
-
     index_buff = BytesIO()
 
     text_wrap = TextIOWrapper(index_buff, "utf-8", write_through=True)
@@ -192,6 +189,7 @@ def create_wacz(res):
                 return 1
 
             with open(res.pages, "rb") as fh:
+                pages_jsonl = zipfile.ZipInfo("pages/pages.jsonl", now())
                 with wacz.open(pages_jsonl, "w") as pages_file:
                     shutil.copyfileobj(fh, pages_file)
 
@@ -216,6 +214,7 @@ def create_wacz(res):
         if res.copy_pages:
             print("Copying passed extraPages.jsonl file to WACZ")
             if validate_pages_jsonl_file(res.extra_pages):
+                extra_pages_jsonl = zipfile.ZipInfo("pages/extraPages.jsonl", now())
                 with open(res.extra_pages, "rb") as fh:
                     with wacz.open(extra_pages_jsonl, "w") as extra_pages_file:
                         shutil.copyfileobj(fh, extra_pages_file)
