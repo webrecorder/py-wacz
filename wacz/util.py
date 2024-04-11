@@ -1,4 +1,4 @@
-import hashlib, datetime, json
+import hashlib, datetime, json, os
 from warcio.timeutils import iso_date_to_timestamp
 import pkg_resources
 
@@ -58,6 +58,13 @@ def hash_stream(hash_type, stream):
     return size, hash_type + ":" + hasher.hexdigest()
 
 
+def hash_file(type_, filename):
+    with open(filename, "rb") as fh:
+        size_, hash_ = hash_stream(type_, fh)
+
+    return hash_
+
+
 def construct_passed_pages_dict(passed_pages_list):
     """Creates a dictionary of the passed pages with the url as the key or ts/url if ts is present and the title and text as the values if they have been passed"""
     passed_pages_dict = {}
@@ -99,4 +106,33 @@ def validateJSON(jsonData):
         json.loads(jsonData)
     except ValueError as err:
         return False
+    return True
+
+
+def validate_pages_jsonl_file(json_file_path):
+    """Attempt to validate pages.jsonl file"""
+    filename = os.path.basename(json_file_path)
+    if not filename.endswith(".jsonl"):
+        return False
+
+    line_index = 0
+
+    with open(json_file_path, "r") as jsonl_file:
+        for line in jsonl_file:
+            try:
+                data = json.loads(line)
+                if line_index == 0:
+                    data["format"]
+                    data["id"]
+                else:
+                    data["url"]
+                    data["ts"]
+                line_index += 1
+            except json.JSONDecodeError:
+                print(f"File {filename} is invalid JSONL")
+                return False
+            except KeyError:
+                print(f"File {filename} missing required fields")
+                return False
+
     return True

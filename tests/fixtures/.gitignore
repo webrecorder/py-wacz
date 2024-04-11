@@ -5,3 +5,4 @@
 !*.warc.gz
 !*.wacz
 !*.jsonl
+!pages/*

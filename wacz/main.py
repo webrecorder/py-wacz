@@ -4,7 +4,7 @@ import os, json, datetime, shutil, zipfile, sys, gzip, pkg_resources
 from wacz.waczindexer import WACZIndexer
 from wacz.util import now, WACZ_VERSION, construct_passed_pages_dict
 from wacz.validate import Validation, OUTDATED_WACZ
-from wacz.util import validateJSON, get_py_wacz_version
+from wacz.util import validateJSON, get_py_wacz_version, validate_pages_jsonl_file
 from warcio.timeutils import iso_date_to_timestamp
 
 """
@@ -60,9 +60,10 @@ def main(args=None):
     )
 
     create.add_argument(
-        "--pages-file",
-        help="Overrides the pages generation by copying files to WACZ without parsing",
-        nargs="+",
+        "-c",
+        "--copy-pages",
+        help="Overrides the pages/extra-pages options by copying files to WACZ without parsing",
+        action="store_true",
     )
 
     create.add_argument(
@@ -114,18 +115,9 @@ def main(args=None):
     if cmd.cmd == "create" and cmd.ts is not None and cmd.url is None:
         parser.error("--url must be specified when --ts is passed")
 
-    if (
-        cmd.cmd == "create"
-        and cmd.detect_pages is not False
-        and (cmd.pages is not None or cmd.pages_file is not None)
-    ):
+    if cmd.cmd == "create" and cmd.detect_pages is not False and cmd.pages is not None:
         parser.error(
-            "--pages/--pages-file and --detect-pages can't be set at the same time they cancel each other out."
-        )
-
-    if cmd.cmd == "create" and cmd.pages is not None and cmd.pages_file is not None:
-        parser.error(
-            "--pages and --pages-file can't be set at same time as they cancel each other out."
+            "--pages and --detect-pages can't be set at the same time they cancel each other out."
         )
 
     value = cmd.func(cmd)
@@ -144,7 +136,7 @@ def validate_wacz(res):
     validation_tests = []
 
     if version == OUTDATED_WACZ:
-        print("Validation Succeeded the passed Wacz is outdate but valid")
+        print("Validation succeeded, the passed WACZ is outdated but valid")
         return 0
 
     elif version == WACZ_VERSION:
@@ -156,16 +148,16 @@ def validate_wacz(res):
             validate.check_data_package_hash_and_sig,
         ]
     else:
-        print("Validation Failed the passed Wacz is invalid")
+        print("Validation failed, the passed WACZ is invalid")
         return 1
 
     for func in validation_tests:
         success = func()
         if success is False:
-            print("Validation Failed the passed Wacz is invalid")
+            print("Validation failed, the passed WACZ is invalid")
             return 1
 
-    print("Validation Succeeded the passed Wacz is valid")
+    print("Validation succeeded, the passed WACZ is valid")
     return 0
 
 
@@ -190,55 +182,60 @@ def create_wacz(res):
     passed_pages_dict = {}
 
     # Handle pages
-    if res.pages_file is not None:
-        for page_file in res.pages_file:
-            page_file = os.path.abspath(page_file)
-            filename = os.path.basename(page_file)
-
-            if filename == "pages.jsonl":
-                with wacz.open(pages_jsonl, "w") as page_jsonl_file:
-                    with open(page_file, "rb") as in_fh:
-                        shutil.copyfileobj(in_fh, page_jsonl_file)
-
-            if filename == "extraPages.jsonl":
-                with wacz.open(extra_pages_jsonl, "w") as extra_page_file:
-                    with open(page_file, "rb") as in_fh:
-                        shutil.copyfileobj(in_fh, extra_page_file)
-
     if res.pages != None:
-        print("Validating passed pages.jsonl file")
-        passed_content = []
-        with open(res.pages, "rb") as fh:
-            for line in fh:
-                if not line:
-                    continue
+        if res.copy_pages:
+            print("Copying passed pages.jsonl file to WACZ")
 
-                try:
-                    line = line.decode("utf-8")
-                    passed_content.append(line)
-                except:
-                    print("Page data not utf-8 encoded, skipping", line)
+            if not validate_pages_jsonl_file(res.pages):
+                print("Unable to create WACZ without valid pages.jsonl file, quitting")
+                wacz.close()
+                return 1
 
-        # Create a dict of the passed pages that will be used in the construction of the index
-        passed_pages_dict = construct_passed_pages_dict(passed_content)
+            with open(res.pages, "rb") as fh:
+                with wacz.open(pages_jsonl, "w") as pages_file:
+                    shutil.copyfileobj(fh, pages_file)
+
+        else:
+            print("Validating passed pages.jsonl file")
+            passed_content = []
+            with open(res.pages, "rb") as fh:
+                for line in fh:
+                    if not line:
+                        continue
+
+                    try:
+                        line = line.decode("utf-8")
+                        passed_content.append(line)
+                    except:
+                        print("Page data not utf-8 encoded, skipping", line)
+
+            # Create a dict of the passed pages that will be used in the construction of the index
+            passed_pages_dict = construct_passed_pages_dict(passed_content)
 
     if res.extra_pages:
-        print("Validating extra pages file")
-        extra_page_data = []
-        with open(res.extra_pages) as fh:
-            data = fh.read()
-            for page_str in data.strip().split("\n"):
-                page_json = validateJSON(page_str)
+        if res.copy_pages:
+            print("Copying passed pages.jsonl file to WACZ")
+            if validate_pages_jsonl_file(res.extra_pages):
+                with open(res.pages, "rb") as fh:
+                    with wacz.open(extra_pages_jsonl, "w") as extra_pages_file:
+                        shutil.copyfileobj(fh, extra_pages_file)
+        else:
+            print("Validating extra pages file")
+            extra_page_data = []
+            with open(res.extra_pages) as fh:
+                data = fh.read()
+                for page_str in data.strip().split("\n"):
+                    page_json = validateJSON(page_str)
 
-                if not page_json:
-                    print("Warning: Ignoring invalid extra page\n %s" % page_str)
-                    continue
+                    if not page_json:
+                        print("Warning: Ignoring invalid extra page\n %s" % page_str)
+                        continue
 
-                extra_page_data.append(page_str.encode("utf-8"))
+                    extra_page_data.append(page_str.encode("utf-8"))
 
-        extra_pages_file = zipfile.ZipInfo(EXTRA_PAGES_INDEX, now())
-        with wacz.open(extra_pages_file, "w") as efh:
-            efh.write(b"\n".join(extra_page_data))
+            extra_pages_file = zipfile.ZipInfo(EXTRA_PAGES_INDEX, now())
+            with wacz.open(extra_pages_file, "w") as efh:
+                efh.write(b"\n".join(extra_page_data))
 
     print("Reading and Indexing All WARCs")
     with wacz.open(data_file, "w") as data:
@@ -300,7 +297,7 @@ def create_wacz(res):
                     shutil.copyfileobj(in_fh, out_fh)
                     path = "logs/{}".format(log_file)
 
-    if len(wacz_indexer.pages) > 0 and res.pages == None and res.pages_file is None:
+    if len(wacz_indexer.pages) > 0 and res.pages == None and not res.copy_pages:
         print("Generating page index...")
         # generate pages/text
         wacz_indexer.write_page_list(
@@ -314,7 +311,7 @@ def create_wacz(res):
             ),
         )
 
-    if len(wacz_indexer.pages) > 0 and res.pages != None and res.pages_file is None:
+    if len(wacz_indexer.pages) > 0 and res.pages != None and not res.copy_pages:
         print("Generating page index from passed pages...")
         # Initially set the default value of the header id and title
         id_value = "pages"
@@ -345,7 +342,7 @@ def create_wacz(res):
             ),
         )
 
-    if len(wacz_indexer.extra_pages) > 0 and res.pages_file is None:
+    if len(wacz_indexer.extra_pages) > 0 and not res.copy_pages:
         wacz_indexer.write_page_list(
             wacz,
             EXTRA_PAGES_INDEX,
@@ -357,7 +354,7 @@ def create_wacz(res):
             ),
         )
 
-    if len(wacz_indexer.extra_page_lists) > 0 and res.pages_file is None:
+    if len(wacz_indexer.extra_page_lists) > 0 and not res.copy_pages:
         print("Generating extra page lists...")
 
         for name, pagelist in wacz_indexer.extra_page_lists.items():
