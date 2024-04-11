@@ -112,7 +112,7 @@ def validateJSON(jsonData):
 def validate_pages_jsonl_file(json_file_path):
     """Attempt to validate pages.jsonl file"""
     filename = os.path.basename(json_file_path)
-    if not filename.endswith(".jsonl"):
+    if not filename.lower().endswith(".jsonl"):
         return False
 
     line_index = 0
