@@ -216,7 +216,7 @@ def create_wacz(res):
         if res.copy_pages:
             print("Copying passed pages.jsonl file to WACZ")
             if validate_pages_jsonl_file(res.extra_pages):
-                with open(res.pages, "rb") as fh:
+                with open(res.extra_pages, "rb") as fh:
                     with wacz.open(extra_pages_jsonl, "w") as extra_pages_file:
                         shutil.copyfileobj(fh, extra_pages_file)
         else:
