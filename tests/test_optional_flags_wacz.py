@@ -3,10 +3,12 @@ import tempfile
 import os
 import zipfile, json, gzip
 from wacz.main import main, now
+from wacz.util import hash_file
 from unittest.mock import patch
 import jsonlines
 
 TEST_DIR = os.path.join(os.path.dirname(os.path.realpath(__file__)), "fixtures")
+PAGES_DIR = os.path.join(TEST_DIR, "pages")
 
 
 class TestWaczFormat(unittest.TestCase):
@@ -33,6 +35,95 @@ class TestWaczFormat(unittest.TestCase):
                     ]
                 ),
                 0,
+            )
+
+    def test_invalid_passed_pages_copy_pages(self):
+        """If a user passes an invalid pages.jsonl file using --page --copy-pages we should return an error"""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            self.assertEqual(
+                main(
+                    [
+                        "create",
+                        "-f",
+                        os.path.join(TEST_DIR, "example-collection.warc"),
+                        "-o",
+                        os.path.join(
+                            tmpdir, "example-collection-invalid-copy-pages.wacz"
+                        ),
+                        "-p",
+                        os.path.join(PAGES_DIR, "invalid.jsonl"),
+                        "--copy-pages",
+                    ]
+                ),
+                1,
+            )
+
+            self.assertEqual(
+                main(
+                    [
+                        "create",
+                        "-f",
+                        os.path.join(TEST_DIR, "example-collection.warc"),
+                        "-o",
+                        os.path.join(
+                            tmpdir, "example-collection-invalid-copy-pages-txt.wacz"
+                        ),
+                        "-p",
+                        os.path.join(PAGES_DIR, "invalid.txt"),
+                        "--copy-pages",
+                    ]
+                ),
+                1,
+            )
+
+    def test_invalid_passed_extra_pages_copy_pages(self):
+        """If a user passes an invalid extarPages.jsonl file using -e --copy-pages we still create WACZ without extra pages"""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            self.assertEqual(
+                main(
+                    [
+                        "create",
+                        "-f",
+                        os.path.join(TEST_DIR, "example-collection.warc"),
+                        "-o",
+                        os.path.join(
+                            tmpdir, "example-collection-invalid-copy-extra-pages.wacz"
+                        ),
+                        "-p",
+                        os.path.join(PAGES_DIR, "pages.jsonl"),
+                        "-e",
+                        os.path.join(PAGES_DIR, "invalid.txt"),
+                        "--copy-pages",
+                    ]
+                ),
+                0,
+            )
+
+            with zipfile.ZipFile(
+                os.path.join(
+                    tmpdir, "example-collection-invalid-copy-extra-pages.wacz"
+                ),
+                "r",
+            ) as zip_ref:
+                zip_ref.extractall(os.path.join(tmpdir, "wacz_no_extra_pages"))
+                zip_ref.close()
+
+            self.assertEqual(
+                main(
+                    [
+                        "validate",
+                        "-f",
+                        os.path.join(
+                            tmpdir, "example-collection-invalid-copy-extra-pages.wacz"
+                        ),
+                    ]
+                ),
+                0,
+            )
+
+            self.assertFalse(
+                "extraPages.jsonl"
+                in os.listdir(os.path.join(tmpdir, "wacz_no_extra_pages/pages/"))
             )
 
     @patch("wacz.main.now")
@@ -94,6 +185,70 @@ class TestWaczFormat(unittest.TestCase):
                     self.assertTrue("ts" in obj.keys())
                     self.assertTrue("url" in obj.keys())
                     self.assertTrue(obj["url"].encode() in cdx_content)
+
+    @patch("wacz.main.now")
+    def test_warc_with_copy_pages(self, mock_now):
+        """When passing the pages and extra-pages flags with copy-pages, the files should end up in the WACZ exactly as-is"""
+        mock_now.return_value = (2020, 10, 7, 22, 29, 10)
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            self.assertEqual(
+                main(
+                    [
+                        "create",
+                        "-f",
+                        os.path.join(TEST_DIR, "example-collection.warc"),
+                        "-o",
+                        os.path.join(tmpdir, "example-collection-copy-pages.wacz"),
+                        "-p",
+                        os.path.join(PAGES_DIR, "pages.jsonl"),
+                        "-e",
+                        os.path.join(PAGES_DIR, "extraPages.jsonl"),
+                        "--copy-pages",
+                    ]
+                ),
+                0,
+            )
+
+            with zipfile.ZipFile(
+                os.path.join(tmpdir, "example-collection-copy-pages.wacz"), "r"
+            ) as zip_ref:
+                zip_ref.extractall(os.path.join(tmpdir, "unzipped_copy_pages"))
+                zip_ref.close()
+
+            self.assertEqual(
+                main(
+                    [
+                        "validate",
+                        "-f",
+                        os.path.join(tmpdir, "example-collection-copy-pages.wacz"),
+                    ]
+                ),
+                0,
+            )
+
+            wacz_pages = os.path.join(tmpdir, "unzipped_copy_pages/pages/pages.jsonl")
+            wacz_extra_pages = os.path.join(
+                tmpdir, "unzipped_copy_pages/pages/extraPages.jsonl"
+            )
+
+            self.assertTrue(
+                "pages.jsonl"
+                in os.listdir(os.path.join(tmpdir, "unzipped_copy_pages/pages/"))
+            )
+            self.assertTrue(
+                "extraPages.jsonl"
+                in os.listdir(os.path.join(tmpdir, "unzipped_copy_pages/pages/"))
+            )
+
+            self.assertEqual(
+                hash_file("sha256", wacz_pages),
+                hash_file("sha256", os.path.join(PAGES_DIR, "pages.jsonl")),
+            )
+            self.assertEqual(
+                hash_file("sha256", wacz_extra_pages),
+                hash_file("sha256", os.path.join(PAGES_DIR, "extraPages.jsonl")),
+            )
 
     @patch("wacz.main.now")
     def test_warc_with_detect_pages_flag(self, mock_now):

@@ -2,7 +2,7 @@
 # vim: set sw=4 et:
 from setuptools import setup, find_packages
 
-__version__ = "0.4.9"
+__version__ = "0.5.0"
 
 def load_requirements(filename):
     with open(filename, "rt") as fh:
@@ -24,7 +24,7 @@ setup(
     long_description=long_description(),
     long_description_content_type="text/markdown",
     install_requires=load_requirements("requirements.txt"),
-    extras_require={"signing": ["authsign>=0.3.1", "requests"]},
+    extras_require={"signing": ["authsign>=0.5.1", "requests"]},
     zip_safe=True,
     setup_requires=["pytest-runner"],
     entry_points="""
