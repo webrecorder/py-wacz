@@ -242,11 +242,12 @@ class TestWaczFormat(unittest.TestCase):
             )
 
             self.assertEqual(
-                hash_file(wacz_pages), hash_file(os.path.join(PAGES_DIR, "pages.jsonl"))
+                hash_file("sha256", wacz_pages),
+                hash_file("sha256", os.path.join(PAGES_DIR, "pages.jsonl")),
             )
             self.assertEqual(
-                hash_file(wacz_extra_pages),
-                hash_file(os.path.join(PAGES_DIR, "extraPages.jsonl")),
+                hash_file("sha256", wacz_extra_pages),
+                hash_file("sha256", os.path.join(PAGES_DIR, "extraPages.jsonl")),
             )
 
     @patch("wacz.main.now")
