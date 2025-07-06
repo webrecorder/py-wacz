@@ -5,7 +5,6 @@ import zipfile, json, gzip
 from wacz.main import main, now
 from wacz.util import hash_file
 from unittest.mock import patch
-import jsonlines
 
 TEST_DIR = os.path.join(os.path.dirname(os.path.realpath(__file__)), "fixtures")
 PAGES_DIR = os.path.join(TEST_DIR, "pages")
