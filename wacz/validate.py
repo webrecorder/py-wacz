@@ -47,7 +47,7 @@ class Validation(object):
             return 1
         if glob.glob(os.path.join(self.dir.name, "pages/pages.jsonl")) == False:
             print(
-                "An index file is missing from your indexes folder you must have an index.cdx.gz, index,cdx or index.idx in your index folder"
+                "A pages file is missing from your pages folder; you must have a pages.jsonl in your pages folder"
             )
             return 1
 
