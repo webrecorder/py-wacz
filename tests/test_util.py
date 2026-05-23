@@ -3,8 +3,9 @@ import tempfile
 import os
 import zipfile, json, gzip, hashlib
 from io import BytesIO
+from unittest.mock import patch
 
-from wacz.util import hash_stream, validateJSON
+from wacz.util import get_py_wacz_version, hash_stream, validateJSON
 
 TEST_DIR = os.path.join(os.path.dirname(os.path.realpath(__file__)), "fixtures")
 
@@ -29,6 +30,12 @@ class TestUtilFunctions(unittest.TestCase):
     def test_util_validate_json_fail(self):
         """validate json method should fail with valid json"""
         self.assertFalse(validateJSON('test": "test"}'))
+
+    def test_get_py_wacz_version(self):
+        """Get package version from installed package metadata"""
+        with patch("wacz.util.package_version", return_value="0.5.0") as mock_version:
+            self.assertEqual(get_py_wacz_version(), "0.5.0")
+            mock_version.assert_called_once_with("wacz")
 
 
 if __name__ == "__main__":
