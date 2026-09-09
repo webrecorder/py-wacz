@@ -8,7 +8,7 @@ authors = [
   {name = "Emma Dickson"},
 ]
 license = "Apache-2.0"
-requires-python = ">= 3.10"
+requires-python = ">= 3.11"
 dependencies = [
   "frictionless>=3.23.4",
   "shortuuid>=1.0.1",

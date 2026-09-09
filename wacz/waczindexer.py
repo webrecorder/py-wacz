@@ -380,7 +380,7 @@ class WACZIndexer(CDXJIndexer):
         if res.date:
             package_dict["mainPageDate"] = res.date
 
-        package_dict["created"] = datetime.datetime.utcnow().strftime(
+        package_dict["created"] = datetime.datetime.now(datetime.UTC).strftime(
             "%Y-%m-%dT%H:%M:%SZ"
         )
         self._created = package_dict["created"]

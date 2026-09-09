@@ -97,7 +97,7 @@ def construct_passed_pages_dict(passed_pages_list):
 
 def now():
     """Returns the current time"""
-    return tuple(datetime.datetime.utcnow().timetuple()[:6])
+    return tuple(datetime.datetime.now(datetime.UTC).timetuple()[:6])
 
 
 def validateJSON(jsonData):
