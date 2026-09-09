@@ -14,9 +14,7 @@ dependencies = [
   "shortuuid>=1.0.1",
   "cdxj-indexer>=1.4.4",
   "boilerpy3>=1.0.2",
-  "PyYAML>=5.3.1",
   "jsonlines>=3.0.0",
-  "click>=8.0.0",
 ]
 
 [project.urls]
