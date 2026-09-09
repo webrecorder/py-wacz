@@ -23,7 +23,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          uv sync --locked --extra signing --python ${{ matrix.python-version }}
+          uv sync --locked --dev --extra signing --python ${{ matrix.python-version }}
 
       - name: Style Check
         run: |

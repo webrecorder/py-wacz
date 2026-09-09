@@ -1635,16 +1635,13 @@ name = "wacz"
 version = "0.5.0"
 source = { editable = "." }
 dependencies = [
-    { name = "black" },
     { name = "boilerpy3" },
     { name = "cdxj-indexer" },
     { name = "click" },
     { name = "frictionless" },
     { name = "jsonlines" },
-    { name = "pytest-cov" },
     { name = "pyyaml" },
     { name = "shortuuid" },
-    { name = "typer" },
 ]
 
 [package.optional-dependencies]
@@ -1653,22 +1650,33 @@ signing = [
     { name = "requests" },
 ]
 
+[package.dev-dependencies]
+dev = [
+    { name = "black" },
+    { name = "pytest-cov" },
+    { name = "typer" },
+]
+
 [package.metadata]
 requires-dist = [
     { name = "authsign", marker = "extra == 'signing'", specifier = ">=0.5.1" },
-    { name = "black", specifier = ">=20.8b1" },
     { name = "boilerpy3", specifier = ">=1.0.2" },
     { name = "cdxj-indexer", specifier = ">=1.4.4" },
     { name = "click", specifier = ">=8.0.0" },
     { name = "frictionless", specifier = ">=3.23.4" },
     { name = "jsonlines", specifier = ">=3.0.0" },
-    { name = "pytest-cov", specifier = ">=2.10.1" },
     { name = "pyyaml", specifier = ">=5.3.1" },
     { name = "requests", marker = "extra == 'signing'" },
     { name = "shortuuid", specifier = ">=1.0.1" },
-    { name = "typer", specifier = "==0.11.1" },
 ]
 provides-extras = ["signing"]
+
+[package.metadata.requires-dev]
+dev = [
+    { name = "black", specifier = ">=20.8b1" },
+    { name = "pytest-cov", specifier = ">=2.10.1" },
+    { name = "typer", specifier = "==0.11.1" },
+]
 
 [[package]]
 name = "warcio"
