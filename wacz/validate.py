@@ -1,4 +1,4 @@
-import tempfile, os, zipfile, json, pathlib, pkg_resources, gzip
+import tempfile, os, zipfile, json, pathlib, gzip
 from frictionless import validate
 from wacz.util import hash_stream, now
 from wacz.waczindexer import WACZIndexer
