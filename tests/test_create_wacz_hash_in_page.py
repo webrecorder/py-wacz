@@ -49,10 +49,7 @@ class TestWaczFor(unittest.TestCase):
         ) as f:
             content = f.read()
 
-        assert (
-            content
-            == """\
+        assert content == """\
 {"format": "json-pages-1.0", "id": "pages", "title": "Pages"}
 {"id": "abcdef", "url": "https://www.example.com/#hashtag", "title": "Example", "loadState": 4, "ts": "2020-10-07T21:22:36Z"}
 """
-        )
