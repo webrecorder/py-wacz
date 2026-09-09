@@ -32,7 +32,7 @@ dev = [
 
 [project.optional-dependencies]
 signing = [
-  "authsign>=0.5.1",
+  "authsign>=0.6.0",
   "requests",
 ]
 
@@ -42,3 +42,6 @@ build-backend = "setuptools.build_meta"
 
 [tool.uv]
 exclude-newer = "7 days"
+
+[tool.uv.exclude-newer-package]
+authsign = false
