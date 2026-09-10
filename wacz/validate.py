@@ -6,7 +6,6 @@ from io import BytesIO, StringIO, TextIOWrapper
 import glob
 import datetime
 import logging
-import requests
 
 OUTDATED_WACZ = "0.1.0"
 
@@ -204,6 +203,8 @@ class Validation(object):
         return True
 
     def check_data_package_hash_and_sig(self):
+        import requests
+
         data_digest_filename = os.path.join(self.dir.name, "datapackage-digest.json")
         if not os.path.exists(data_digest_filename):
             return True
