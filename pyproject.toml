@@ -15,6 +15,8 @@ dependencies = [
   "cdxj-indexer>=1.4.4",
   "boilerpy3>=1.0.2",
   "jsonlines>=3.0.0",
+  "authsign>=0.6.1",
+  "pydantic>=2",
 ]
 
 [project.urls]
