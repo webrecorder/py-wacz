@@ -1,6 +1,6 @@
 from argparse import ArgumentParser, RawTextHelpFormatter
 from io import BytesIO, StringIO, TextIOWrapper
-import os, json, datetime, shutil, zipfile, sys, gzip, pkg_resources
+import os, json, datetime, shutil, zipfile, sys, gzip
 from wacz.waczindexer import WACZIndexer
 from wacz.util import now, WACZ_VERSION, construct_passed_pages_dict
 from wacz.validate import Validation, OUTDATED_WACZ

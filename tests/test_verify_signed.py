@@ -1,7 +1,6 @@
 import unittest, os
 from wacz.main import main
 
-
 TEST_DIR = os.path.join(os.path.dirname(os.path.realpath(__file__)), "fixtures")
 
 
