@@ -161,7 +161,7 @@ An optional, secret token passed to signing server to allow access. See `authsig
 You can also validate an existing WACZ file by running:
 
 ```
-wacz validate myfile.wacz
+wacz validate -f myfile.wacz
 ```
 
 ### -f --file
@@ -169,7 +169,7 @@ wacz validate myfile.wacz
 Explicitly declare the file being passed to the validate function.
 
 ```
-wacz validate -f tests/fixtures/example-collection.warc
+wacz validate -f tests/fixtures/valid_example_1.wacz
 ```
 
 ### --verify-auth
