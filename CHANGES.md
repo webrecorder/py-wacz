@@ -1,3 +1,21 @@
+# 0.6.0
+
+- Fix usage on newer Python and setuptools version. (https://github.com/webrecorder/py-wacz/pull/54)
+- Modernize packaging using pyproject.toml. (https://github.com/webrecorder/py-wacz/pull/55)
+- Correctly report all validation errors when a WACZ fails to validate. (https://github.com/webrecorder/py-wacz/pull/62)
+
+Note: the minimum Python version is now 3.11.
+
+# 0.5.0
+
+- Add --copy-pages option to copy pages.jsonl/extraPages.jsonl directly to WACZ by @tw4l in https://github.com/webrecorder/py-wacz/pull/43
+
+# 0.4.9
+
+- Fix typos by @stavares843 in https://github.com/webrecorder/py-wacz/pull/31
+- Update README to fix --verifier-url param by @vbanos in https://github.com/webrecorder/py-wacz/pull/34
+- Ignore hashtag when matching pages to URLs in WARCs by @ikreymer in https://github.com/webrecorder/py-wacz/pull/35
+
 # 0.4.8
 
 - Add -l/--log-directory option to add logs directory to WACZ
