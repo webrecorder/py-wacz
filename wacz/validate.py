@@ -92,12 +92,13 @@ class Validation(object):
 
     def frictionless_validate(self):
         """Uses the frictionless data package to validate the datapackage.json file"""
-        if validate(self.datapackage_path).valid == True:
+        report = validate(self.datapackage_path)
+        if report.valid == True:
             return True
         else:
             print(
                 "\nFrictionless has detected that this is an invalid package with errors %s"
-                % validate(self.datapackage_path).errors
+                % {task.name: task.errors for task in report.tasks}
             )
             return False
 
