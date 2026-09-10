@@ -15,7 +15,6 @@ from wacz.util import (
 
 import datetime
 import hashlib
-import requests
 
 HTML_MIME_TYPES = ("text/html", "application/xhtml", "application/xhtml+xml")
 
@@ -403,6 +402,8 @@ class WACZIndexer(CDXJIndexer):
         return json.dumps(digest_dict, indent=2)
 
     def do_sign(self, digest_dict):
+        import requests
+
         try:
             headers = {}
             if self.signing_token:
