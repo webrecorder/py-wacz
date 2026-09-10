@@ -53,7 +53,7 @@ wheels = [
 
 [[package]]
 name = "authsign"
-version = "0.6.0"
+version = "0.6.1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "acme" },
@@ -67,9 +67,9 @@ dependencies = [
     { name = "rfc3161ng" },
     { name = "uvicorn" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/2b/35/e40f3250a8cafc7646c997e90ecd24048f6bed6946bb54ac0595b04e6ffd/authsign-0.6.0.tar.gz", hash = "sha256:9dad52ee34d7bfb9c22443d2baebfecd50d273555824c06d371bde72b048ae2a", size = 19347, upload-time = "2026-09-09T17:42:03.679Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/8a/68/acf19863206b7ed20e05f5eb77d081eecea4308b3bde741304a42aade851/authsign-0.6.1.tar.gz", hash = "sha256:094d8b6f6734ee9350fd65de4940e5130aceec95186c60b2e7884efab69184ff", size = 20104, upload-time = "2026-09-10T00:39:14.433Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/90/eb/26346decd27f9e694e67f06ce354396afc8f4617a2f38c071753e1778a98/authsign-0.6.0-py3-none-any.whl", hash = "sha256:155c6fa145b7c82df75004148a139cc821db9d187da0b438caa1a8ac682a5510", size = 18174, upload-time = "2026-09-09T17:42:02.81Z" },
+    { url = "https://files.pythonhosted.org/packages/0d/5e/c5f40a958d5543613543e685023db0f115ccbdd11f1993d0244a7d70c8a3/authsign-0.6.1-py3-none-any.whl", hash = "sha256:32669857986979e4e193bdb5ece8e73690e3ad8e5c79c14eb2f53d0b9553a3ff", size = 18984, upload-time = "2026-09-10T00:39:13.368Z" },
 ]
 
 [[package]]
@@ -1556,7 +1556,7 @@ dev = [
 
 [package.metadata]
 requires-dist = [
-    { name = "authsign", marker = "extra == 'signing'", specifier = ">=0.6.0" },
+    { name = "authsign", marker = "extra == 'signing'", specifier = ">=0.6.1" },
     { name = "boilerpy3", specifier = ">=1.0.2" },
     { name = "cdxj-indexer", specifier = ">=1.4.4" },
     { name = "frictionless", specifier = ">=3.23.4" },
