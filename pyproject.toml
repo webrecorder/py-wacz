@@ -15,6 +15,7 @@ dependencies = [
   "cdxj-indexer>=1.4.4",
   "boilerpy3>=1.0.2",
   "jsonlines>=3.0.0",
+  "authsign>=0.6.1",
 ]
 
 [project.urls]
@@ -32,7 +33,7 @@ dev = [
 
 [project.optional-dependencies]
 signing = [
-  "authsign>=0.5.1",
+  "authsign>=0.6.1",
   "requests",
 ]
 
@@ -42,3 +43,6 @@ build-backend = "setuptools.build_meta"
 
 [tool.uv]
 exclude-newer = "7 days"
+
+[tool.uv.exclude-newer-package]
+authsign = false
