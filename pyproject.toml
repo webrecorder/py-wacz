@@ -1,0 +1,44 @@
+[project]
+name = "wacz"
+version = "0.5.0"
+description = "WACZ Format Tools"
+readme = "README.md"
+authors = [
+  {name = "Ilya Kreymer", email="info@webrecorder.net"},
+  {name = "Emma Dickson"},
+]
+license = "Apache-2.0"
+requires-python = ">= 3.10"
+dependencies = [
+  "frictionless>=3.23.4",
+  "shortuuid>=1.0.1",
+  "cdxj-indexer>=1.4.4",
+  "boilerpy3>=1.0.2",
+  "jsonlines>=3.0.0",
+]
+
+[project.urls]
+Repository = "https://github.com/webrecorder/py-wacz"
+
+[project.scripts]
+wacz = "wacz.main:main"
+
+[dependency-groups]
+dev = [
+  "black>=20.8b1",
+  "pytest-cov>=2.10.1",
+  "typer==0.11.1",
+]
+
+[project.optional-dependencies]
+signing = [
+  "authsign>=0.5.1",
+  "requests",
+]
+
+[build-system]
+requires = ["setuptools>=42"]
+build-backend = "setuptools.build_meta"
+
+[tool.uv]
+exclude-newer = "7 days"
