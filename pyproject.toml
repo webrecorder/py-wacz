@@ -32,7 +32,7 @@ dev = [
 
 [project.optional-dependencies]
 signing = [
-  "authsign>=0.6.0",
+  "authsign>=0.6.1",
   "requests",
 ]
 
