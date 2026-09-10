@@ -1653,7 +1653,6 @@ name = "wacz"
 version = "0.5.0"
 source = { editable = "." }
 dependencies = [
-    { name = "authsign" },
     { name = "boilerpy3" },
     { name = "cdxj-indexer" },
     { name = "frictionless" },
@@ -1676,7 +1675,6 @@ dev = [
 
 [package.metadata]
 requires-dist = [
-    { name = "authsign", specifier = ">=0.6.1" },
     { name = "authsign", marker = "extra == 'signing'", specifier = ">=0.6.1" },
     { name = "boilerpy3", specifier = ">=1.0.2" },
     { name = "cdxj-indexer", specifier = ">=1.4.4" },
