@@ -12,6 +12,7 @@ exclude-newer-span = "P7D"
 
 [options.exclude-newer-package]
 authsign = false
+cdxj-indexer = false
 
 [[package]]
 name = "acme"
@@ -129,18 +130,17 @@ wheels = [
 
 [[package]]
 name = "cdxj-indexer"
-version = "1.4.6"
+version = "1.5.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "idna" },
     { name = "multipart" },
     { name = "py3amf" },
     { name = "surt" },
     { name = "warcio" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/ef/b1/01fd5e8316cdfca178e951ba554309b9fe20910328039ca03830d7ca11ac/cdxj_indexer-1.4.6.tar.gz", hash = "sha256:7606d0c3eeba530323f6fafa62647c74c86ddefdca1edffa2d9d303388112238", size = 19024, upload-time = "2024-12-10T21:39:01.64Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/a1/bc/56f3b156c58fc1c1eadd95e69ff7178c45ddb7a750876254a7f0ad69b600/cdxj_indexer-1.5.0.tar.gz", hash = "sha256:ecac1f76c9bf77ed1720e1ff875e4fa6b7ae3376ecceb7c4f0d167e5ccc3f8ef", size = 19346, upload-time = "2026-10-01T22:33:18.59Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/ea/57/b2489ba52732906a1ec59c0a852ce35f806a5afe2d4e5c83c3f407e44891/cdxj_indexer-1.4.6-py2.py3-none-any.whl", hash = "sha256:91ff88e0ca8f39f9e772ccfb6e3d245344b8e80db04cca5e88f184f8cbbd6604", size = 14993, upload-time = "2024-12-10T21:39:00.091Z" },
+    { url = "https://files.pythonhosted.org/packages/c7/9c/bc2f7827146b36ad3db63e65932450bae21bda34f939c4f522e998c33f59/cdxj_indexer-1.5.0-py2.py3-none-any.whl", hash = "sha256:5f7f0f15249c9821fb02543dd6e10546967060139c7f47c5760627b29b2ebc38", size = 15000, upload-time = "2026-10-01T22:33:17.545Z" },
 ]
 
 [[package]]
