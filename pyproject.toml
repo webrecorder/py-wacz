@@ -45,3 +45,4 @@ exclude-newer = "7 days"
 
 [tool.uv.exclude-newer-package]
 authsign = false
+cdxj-indexer = false
