@@ -121,19 +121,16 @@ class Validation(object):
 
     def check_compression(self):
         """WARCs and compressed cdx.gz should be in ZIP with 'store' compression (not deflate) Indexes and page list can be compressed"""
-        wacz = zipfile.ZipInfo(self.wacz)
-        if wacz.compress_type != 0:
-            return False
-
-        if os.path.exists(os.path.join(self.dir.name, "indexes/index.cdx.gz")):
-            cdx = zipfile.ZipInfo(os.path.join(self.dir.name, "indexes/index.cdx.gz"))
-            if cdx.compress_type != 0:
-                return False
-
-        archive_folder = os.listdir(os.path.join(self.dir.name, "archive"))
-        for item in archive_folder:
-            if ".warc" not in item and zf.getinfo(item).compress_type != 0:
-                return False
+        with zipfile.ZipFile(self.wacz, "r") as archive:
+            for member in archive.infolist():
+                if member.is_dir():
+                    continue
+                requires_store = member.filename.startswith("archive/") or (
+                    member.filename.startswith("indexes/")
+                    and member.filename.endswith(".cdx.gz")
+                )
+                if requires_store and member.compress_type != zipfile.ZIP_STORED:
+                    return False
         return True
 
     def check_indexes(self):
