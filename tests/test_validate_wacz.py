@@ -53,6 +53,89 @@ class TestWaczFormat(unittest.TestCase):
     def test_check_compression_valid(self):
         self.assertTrue(self.validation_class_valid_1.check_compression())
 
+    def test_check_compression_rejects_deflated_random_access_members(self):
+        """Check the ZIP metadata of both plain/gzipped WARCs and gzipped CDX."""
+        members = (
+            "archive/example.warc",
+            "archive/example.warc.gz",
+            "archive/notes.txt",
+            "indexes/index.cdx.gz",
+        )
+        for member in members:
+            with (
+                self.subTest(member=member),
+                tempfile.TemporaryDirectory() as directory,
+            ):
+                filename = os.path.join(directory, "deflated.wacz")
+                with zipfile.ZipFile(filename, "w") as archive:
+                    archive.writestr(
+                        "datapackage.json",
+                        json.dumps(
+                            {
+                                "wacz_version": "1.1.1",
+                                "resources": [
+                                    {"path": member, "hash": "sha256:unused"}
+                                ],
+                            }
+                        ),
+                    )
+                    archive.writestr("archive/base.warc", b"test")
+                    archive.writestr(
+                        member, b"test", compress_type=zipfile.ZIP_DEFLATED
+                    )
+                self.assertFalse(Validation(filename).check_compression())
+
+    def test_check_compression_allows_deflated_auxiliary_members(self):
+        """Page lists and plain indexes may use ZIP compression."""
+        with tempfile.TemporaryDirectory() as directory:
+            filename = os.path.join(directory, "auxiliary.wacz")
+            with zipfile.ZipFile(filename, "w") as archive:
+                archive.writestr(
+                    "datapackage.json",
+                    json.dumps(
+                        {
+                            "wacz_version": "1.1.1",
+                            "resources": [
+                                {
+                                    "path": "archive/example.warc",
+                                    "hash": "sha256:unused",
+                                }
+                            ],
+                        }
+                    ),
+                )
+                archive.writestr("archive/example.warc", b"test")
+                archive.writestr("archive/notes.txt", b"test")
+                for member in (
+                    "pages/pages.jsonl",
+                    "indexes/index.cdx",
+                    "indexes/index.idx",
+                ):
+                    archive.writestr(
+                        member, b"test", compress_type=zipfile.ZIP_DEFLATED
+                    )
+            self.assertTrue(Validation(filename).check_compression())
+
+    def test_validate_command_rejects_deflated_random_access_members(self):
+        """Recompressing archive data must make an otherwise valid WACZ fail."""
+        original = os.path.join(self.tmpdir.name, "valid_example_1.wacz")
+        for member in ("archive/example-collection.warc", "indexes/index.cdx.gz"):
+            with (
+                self.subTest(member=member),
+                tempfile.TemporaryDirectory() as directory,
+            ):
+                filename = os.path.join(directory, "deflated.wacz")
+                with (
+                    zipfile.ZipFile(original) as source,
+                    zipfile.ZipFile(filename, "w") as target,
+                ):
+                    for info in source.infolist():
+                        contents = source.read(info.filename)
+                        if info.filename == member:
+                            info.compress_type = zipfile.ZIP_DEFLATED
+                        target.writestr(info, contents)
+                self.assertEqual(main(["validate", "-f", filename]), 1)
+
     def test_frictionless_validate_valid_wacz(self):
         """Check that the frictionless validation feature identifies a valid wacz data package as valid"""
         # Use frictionless validation
